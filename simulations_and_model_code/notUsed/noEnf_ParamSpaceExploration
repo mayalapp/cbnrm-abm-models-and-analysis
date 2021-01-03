@@ -1,0 +1,117 @@
+library(RNetLogo)
+library(tictoc)
+
+
+setParam <- function(paramName, paramValue){
+	NLCommand(paste("set", paramName, paramValue, sep=" "))	
+}
+
+# 1. Define a function that runs the simulation model
+# for a given parameter combination and returns the
+# value(s) of the fitting criteria. 
+sim <- function(params) {
+	# params is vector with: cost, max-tree-growth, initial-loggers
+	#    reference-threshold
+	#  in that order! 
+	# for now high-tolerance = "True" 
+	
+	# open NetLogo
+	nl.path <- "/Applications/NetLogo\ 6.0.4/Java"
+	NLStart(nl.path, gui=FALSE, nl.jarname =  "netlogo-6.0.4.jar")
+	# open Endogenous Enforcement model
+	model.path <-"/Applications/NetLogo\ 6.0.4/models/ISmodels/Vallino_NL6/code/Endogenous\ Institution.nlogo"
+	NLLoadModel(model.path)
+	ticks <- 2000
+	runs <- 50
+	
+	
+	#set paramters
+	paramNames <- c("cost", "max-tree-growth", "initial-loggers", "reference-threshold")
+           for(i in 1:length(params)){
+				setParam(paramNames[i], params[i]) 
+			}
+			setParam("high-tolerance", "True") # for now always high tolerance 
+
+output <- data.frame()
+for(i in 1:runs){
+# run simulation 
+	NLCommand("setup")
+	output[i,"iniBM"]<- NLReport("sum [trees] of patches")
+	NLDoCommand(ticks, "go")
+	output[i,"finalBM"] <- NLReport("sum [trees] of patches")
+	output[i,"finalPayoff"] <- NLReport("mean [payoff] of turtles")
+}
+    return(output)
+}
+
+
+
+base.param <- c(5,20,100, 0.5)
+
+###############################
+#change cost
+colNames <- vector()
+
+dataCostNoEnf <- data.frame(1:50)
+for(j in 1:10){
+	newParams <- base.param
+	newParams[1] <- j*2
+	dataCostNoEnf<-cbind(dataCostNoEnf,sim(newParams))
+
+save(dataCostNoEnf, file=paste("changeCostNoEnf", j, ".RData", sep=""))
+}
+
+
+###############################
+#change max-tree-growth 
+colNames <- vector()
+
+dataMTGNoEnf <- data.frame(1:50)
+for(j in 1:6){
+	newParams <- base.param
+	newParams[2] <- j*5
+	dataMTGNoEnf<-cbind(dataMTGNoEnf,sim(newParams))
+
+save(dataMTGNoEnf, file=paste("changeMTGNoEnf", j, ".RData", sep=""))
+}
+
+
+###############################
+#change loggers
+colNames <- vector()
+
+dataLogNoEnf <- data.frame(1:50)
+for(j in 1:6){
+	newParams <- base.param
+	newParams[3] <- j*50
+	dataLogNoEnf<-cbind(dataLogNoEnf,sim(newParams))
+
+save(dataLogNoEnf, file=paste("changeLoggersNoEnf", j, ".RData", sep=""))
+}
+
+####################################
+# reference threshold 
+colNames <- vector()
+
+dataRTNoEnf <- data.frame(1:50)
+for(j in 1:10){
+	newParams <- base.param
+	newParams[4] <- j/10
+	dataRTNoEnf<-cbind(dataRTNoEnf,sim(newParams))
+
+save(dataRTNoEnf, file=paste("changeRTNoEnf", j, ".RData", sep=""))
+}
+
+save(dataCostNoEnf, dataMTGNoEnf, dataLogNoEnf, dataRTNoEnf, file="noEnfParams.RData")
+
+#full-factorial design setup
+
+#cost=c(1,5)
+#maxTreeGrowth = c(10,20)
+#loggers = c(0,50, seq(100,500,100))
+#tol = c("True", "False")
+#refThresh = seq(0,1,0.2)
+#enf = seq(0,100,10)
+
+#full.factorial.design <- expand.grid(cost, maxTreeGrowth, loggers, tol, refThresh, enf)
+#sim.results <- apply(full.factorial.design, 1, sim)

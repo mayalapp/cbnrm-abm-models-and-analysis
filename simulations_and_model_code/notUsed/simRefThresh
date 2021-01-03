@@ -1,0 +1,124 @@
+library(RNetLogo)
+library(tictoc)
+
+
+# open NetLogo
+nl.path <- "/Applications/NetLogo\ 6.0.4/Java"
+NLStart(nl.path, gui=FALSE, nl.jarname =  "netlogo-6.0.4.jar")
+
+# open Endogenous Enforcement model
+model.path <-"/Applications/NetLogo\ 6.0.4/models/ISmodels/Vallino_NL6/code/Enforcement\ Endogenous\ Inst.nlogo"
+NLLoadModel(model.path)
+
+
+setParam <- function(paramName, paramValue){
+	NLCommand(paste("set", paramName, paramValue, sep=" "))	
+}
+
+setUp <- function(){
+setParam("cost", cost)
+setParam("max-tree-growth", maxGrowth)
+setParam("initial-loggers", loggers)
+setParam("high-tolerance", highTol)
+setParam("reference-threshold", ref_thresh) 
+setParam("enforcement-level", enf)
+}
+
+setUpDefault <- function(){
+	cost <- 5
+	maxGrowth <- 20
+	loggers <-100
+	highTol <- "True"
+	ref_thresh <- 0.45
+	enf <- 50
+	
+	setUp()
+}
+
+runs <- 50
+ticks <- 2000
+setUpDefault()
+
+
+###############################
+colNames <- vector()
+for(i in 1:10){
+	colNames[i] <- paste("enf", i*10, sep="")
+}
+
+tic()
+data3 <- data.frame()
+for(j in 1:length(colNames)){
+tic()
+	setParam("enforcement-level", j*10)
+for(i in 1:runs){
+	NLCommand("setup")
+	NLDoCommand(ticks, "go")
+	data3[i,colNames[j]]<- NLReport("sum [trees] of patches")
+
+}
+
+save(data3, file=paste("changeEnf", j, ".RData", sep=""))
+toc()
+}
+totTime<-toc() 
+
+###############################
+colNames <- vector()
+for(i in 1:6){
+	colNames[i] <- paste("log", 200+i*50, sep="")
+}
+
+tic()
+data2 <- data.frame()
+for(j in 1:length(colNames)){
+tic()
+	setParam("initial-loggers", 200+j*50)
+for(i in 1:runs){
+	NLCommand("setup")
+	NLDoCommand(ticks, "go")
+	data2[i,colNames[j]]<- NLReport("sum [trees] of patches")
+
+}
+
+save(data2, file=paste("changeLoggers", j, ".RData", sep=""))
+toc()
+}
+totTime<-toc() 
+####################################
+
+colNames <- vector()
+for(i in 1:9){
+	colNames[i] <- paste("rt", i, sep="")
+}
+
+tic()
+data1 <- data.frame()
+for(j in 1:length(colNames)){
+tic()
+	setParam("reference-threshold", j/10)
+for(i in 1:runs){
+	NLCommand("setup")
+	NLDoCommand(ticks, "go")
+	data1[i,colNames[j]]<- NLReport("sum [trees] of patches")
+
+}
+
+save(data1, file=paste("changeRT", j, ".RData", sep=""))
+toc()
+}
+totTime<-toc() 
+
+
+
+#full-factorial design setup
+
+cost=c(1,5)
+maxTreeGrowth = c(10,20)
+loggers = c(0,50, seq(100,500,100))
+tol = c("True", "False")
+refThresh = seq(0,1,0.2)
+enf = seq(0,100,10)
+
+#full.factorial.design <- expand.grid(cost, maxTreeGrowth, loggers, tol, refThresh, enf)
+#sim.results <- apply(full.factorial.design, 1, sim)

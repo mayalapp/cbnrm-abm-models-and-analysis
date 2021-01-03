@@ -1,0 +1,80 @@
+setParam <- function(paramName, paramValue){
+	NLCommand(paste("set", paramName, paramValue, sep=" "))	
+}
+
+# 1. Define a function that runs the simulation model
+# for a given parameter combination and returns the
+# value(s) of the fitting criteria. 
+sim <- function(params) {
+	# params is vector with: cost, max-tree-growth, initial-loggers
+	#    reference-threshold, enfocement-level
+	#  in that order! 
+	# for now high-tolerance = "True" 
+	
+	# open NetLogo
+	nl.path <- "/Applications/NetLogo\ 6.0.4/Java"
+	NLStart(nl.path, gui=FALSE, nl.jarname =  "netlogo-6.0.4.jar")
+	# open Endogenous Enforcement model
+	model.path <-"/Applications/NetLogo\ 6.0.4/models/ISmodels/Vallino_NL6/code/Enforcement\ Endogenous\ Inst.nlogo"
+	NLLoadModel(model.path)
+	ticks <- 2000
+	runs <- 2
+	
+	
+	#set paramters
+	paramNames <- c("cost", "max-tree-growth", "initial-loggers", "reference-threshold", "enforcement-level")
+           for(i in 1:length(params)){
+				setParam(paramNames[i], params[i]) 
+			}
+			setParam("high-tolerance", "True") # for now always high tolerance 
+
+output <- data.frame()
+for(i in 1:runs){
+# run simulation 
+	NLCommand("setup")
+	NLDoCommand(ticks, "go")
+	output[i,"biomass"] <- NLReport("sum [trees] of patches")
+}
+    return(output)
+}
+
+
+
+base.param <- c(5,20,100, 0.5, 50)
+sim.results.base <- sim(base.params) 
+
+
+
+# 3. Define a function for changing one of the parameter
+# values (here with min and max constraints).
+change <- function(i, base, multiplier) {
+      mod <- base
+      mod[i] <- max(mod[i] * multiplier, 0.0)
+      return(mod)
+}
+
+# 4. Create lists of parameter sets with reduced and
+# increased parameter values (90% and 110%).
+min.params <- lapply(1:(length(base.param)), change,
+                    base=base.param, multiplier=0.9)
+max.params <- lapply(1:(length(base.param)), change,
+                    base=base.param, multiplier=1.1)
+
+
+# 5. Run separate simulations (function in step 1) with
+# input factor values varied by ±10%.
+sim.results <- list()
+sim.results$min <- lapply(min.params, sim)
+sim.results$max <- lapply(max.params, sim)
+
+# 6. Calculate the deviation between the base model output
+# and the outputs using 90% and 110% of the standard value.
+#dev.min <- sapply(sim.results$min, function(x) {
+#   return((x-sim.result.base)/sim.result.base * 100)})
+#dev.max <- sapply(sim.results$max, function(x) {
+#   return((x-sim.result.base)/sim.result.base * 100)})
+
+extra<-data.frame(1:50)
+extra$max<-sim(c(5,20,100,0.5,55))
+extra$min<-sim(c(5,20,100,0.5,45))
+save(extra, file="missedValueSA.RData")

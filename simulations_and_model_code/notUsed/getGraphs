@@ -1,0 +1,29 @@
+getGraphs <- function(fileName){
+	
+plotFile<-read.csv(file = fileName, header=FALSE, stringsAsFactors=FALSE)[,1:2]
+
+i<-1
+j<-1
+out<-data.frame(1:2000)
+while(i<dim(plotFile)[1]){
+	if(plotFile[i,2]=="y"){
+		out[,plotFile[i-8,1]]<-plotFile[(i+1):(i+200),2]
+		j<- j+1
+		i<- i+200
+		print(i)
+	}
+	i<-i+1
+}
+
+colNames <- c("K", "unsatisfied", "Payoffs", "TotalBM", "GreenPatches", "beta.i", "k.i", "numLoggers") 
+out<-out[,-1]
+colnames(out)<- colNames
+
+for(i in 1:length(colNames)){
+	out[,i] <-as.numeric(out[,i])
+}
+
+return(out)
+
+}
+
