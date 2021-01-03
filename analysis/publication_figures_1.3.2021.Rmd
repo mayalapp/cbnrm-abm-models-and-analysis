@@ -6,79 +6,88 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 setwd("~/Documents/WoosterStuff/fall2019/IS_organized/analysis")
 library(tidyverse)
-library(ggthemes)
 library(gridExtra)
-library(patchwork)
-library(ggforce)
 library(ggpubr)
-library(stats)
+library(colorspace)
+
+savePlots = FALSE # determine if running this file should save new plots 
 ```
 
 ```{r setupFiles, warning=FALSE}
-source(file="setupFile.R")
-source(file="setupVallino.R")
+source(file="dataCleaningFunctions.R") # file containing all functions needed for data cleaning process
+source(file = "process_m&s_data.R") # file loading and cleaning M&S model data
+source(file="process_c&e_data.R") # file loading and cleaning C&E model data
+endogInst_data = read.csv("./allData_IS/endogInst_data_7_18.csv")%>%mutate(Period = 1:2001)  # loads a single run of the Endogenous Institution model 
 ```
 
-Setup default plot settings 
 ```{r graphSettings}
-axlab_size <- 12   # set axes label size
-axtick_size <- 10  # set tick label size 
-point_size = 3    # set size of point for scatter plots
-line_size = 1.2    # set size of lines for line plots 
-  
-# define commonly used axes labels 
-ax_kf = expression(paste(bolditalic("final-institution "),bold("("), K[f], bold(")")))   # final institution (K_f)
-axlab_bm<-"Biomass (% remaining)"  # BM%
-axlab_density <- "Density"   
-axlab_time <- "Period"    
-axlab_perc <- "Percent remianing"
+# Setup default plot settings 
 
-# setup plot themes 
+# select sizes for text and geoms on plots 
+axlab_size <- 12
+axtick_size <- 10
+point_size = 3
+line_size = 1.2
+  
+# create axes labels that are used repeatedly 
+ax_kf = expression(paste(bolditalic("final-institution "),bold("("), K[f], bold(")"))) # final-institutions (Kf)
+axlab_bm<-"Biomass (% remaining)"
+axlab_density <- "Density"
+axlab_time <- "Period"
+axlab_perc <- "Percent remianing"
+ax_sanc = expression(bolditalic(sanction-level))
+ax_mon = expression(bolditalic(monitoring-level))
+ax_rt=expression(bolditalic("reference-threshold"))
+ax_surveillance=expression(bold(bolditalic("surveillance-level")))
+ax_mc=expression(bold(bolditalic("minimum-cut")))
+ax_k=expression(paste(bold(bolditalic("current-institution ")), bold("(K)"))) # current-institution (K)
+
+
+
+# setup theme for all graphs to follow 
 setGraphs<- theme_bw()+
   theme(axis.text=element_text(size=axtick_size, color="black"),
         axis.title=element_text(size=axlab_size,face="bold", color="black"), legend.text = element_text(size=axtick_size))+
   theme(panel.border = element_blank(), axis.line = element_line(colour = "black"))
 
-# Setup color theme
-colorTheme="Set2"   # choose color theme
-colorDiscrete = scale_color_brewer(palette=colorTheme)
+
+# setup color theme
+color="Set2"
+colorDiscrete = scale_color_brewer(palette="Set2")
 colorCont = scale_color_viridis_c(option = "magma")
 #fillDiscrete = scale_fill_brewer(palette="Dark2")
-fillDiscrete = scale_fill_brewer(palette=colorTheme)
+fillDiscrete = scale_fill_brewer(palette="Set2")
 fillCont = scale_fill_viridis_c(option = "magma")
 
 # first two colors in Dark2
 #1b9e77
 #d95f02
 
-# First three colors in Set2, so can be used independently 
+# first 3 colors in Set2 (so can be used independently for figures)
 color1="#66c2a5"
 color2="#fc8d62"
 color3="#8da0cb"
 
-# other good color scales to consider
+# other good color themes
 # scale_color_colorblind()
 # scale_color_OkabeIto()
 
+fig = 1
 ```
 
-
+### Figure `r fig`
 Bravo single run
-Run this chunk twice for graphs to work (not sure why)
+
 ```{r bravoRun}
+instChange = 15 # to make verticle line where institution changes (15 is for this specific simulation run. may be different for a different simulation run)
+maxBM = endogInst_data$TotalBM[1] # initial BM in the simulation 
+endogInst_data = endogInst_data%>%mutate(TotalBM = TotalBM/maxBM) # convert Total BM to % remaining
+endogInst_run_data = endogInst_data%>%filter(Period <= 200) # filter out beginning of simulation 
 
-endogInst_data = read.csv("./allData_IS/endogInst_data_7_18.csv")
-endogInst_data = endogInst_data%>%mutate(Period = 1:2001)
-instChange = 15
-maxBM = endogInst_data$TotalBM[1]
-endogInst_data = endogInst_data%>%mutate(TotalBM = TotalBM/maxBM)
-endogInst_run_data = endogInst_data%>%filter(Period <= 200)
-
-
-#ax_k = expression(paste(bolditalic("current-institution")))
+# plot of K
 v1b<-endogInst_run_data%>%ggplot(aes(x=Period))+
   geom_path(aes(y=K),  size=line_size)+
   labs(x=element_blank(), y=ax_k)+
@@ -86,6 +95,7 @@ v1b<-endogInst_run_data%>%ggplot(aes(x=Period))+
   ylim(0,20)+
   setGraphs
 
+# plot of average minimal-cut
 ax = expression(bold(paste("Avg. ", bolditalic("minimal-cut"))))
 v2b<-endogInst_run_data%>%ggplot(aes(x=Period))+
   geom_path(aes(y=k.i),  size=line_size)+
@@ -94,6 +104,7 @@ v2b<-endogInst_run_data%>%ggplot(aes(x=Period))+
   ylim(0,20)+
   setGraphs
 
+# plot of average reference-trees
 ax = expression(bold(paste("Avg. ", bolditalic("reference-trees"))))
 v3b<-endogInst_run_data%>%ggplot(aes(x=Period))+
   geom_path(aes(y=beta.i),  size=line_size)+
@@ -102,6 +113,7 @@ v3b<-endogInst_run_data%>%ggplot(aes(x=Period))+
   ylim(0,1)+
   setGraphs
 
+# plot of BM%
 v4b<-endogInst_run_data%>%ggplot(aes(x=Period))+
   geom_path(aes(y=TotalBM*100),  size=line_size)+
   geom_vline(xintercept = instChange, linetype="dashed", color="dimgrey")+
@@ -110,37 +122,49 @@ v4b<-endogInst_run_data%>%ggplot(aes(x=Period))+
   setGraphs
 
 
+# join plots into one figure 
 viz_bravo=grid.arrange(v1b+ggtitle("a)"), v2b+ggtitle("b)"), v4b+ggtitle("c)"), v3b+ggtitle("d)"), nrow=2)
 viz_bravo=annotate_figure(viz_bravo,
                 bottom = text_grob(expression(bold(Period)), vjust = 0,  size = axlab_size),
 )
 
-ggsave("./figs/viz_bravo2.pdf", viz_bravo, width=5.75, height=4, units="in")
-
-
+if(savePlots) ggsave("./figs/viz_bravo2.pdf", viz_bravo, width=5.75, height=4, units="in")
+fig = fig+1
 ```
 
 
 ## Original Vallino model analyss 
 
+### Figure `r fig`
 Minimal cut polarization - Bravo data 
 ```{r mcPolarization}
-mincut_bravo = endogInst_run_data%>%mutate(midMC = 100 - lowMinCut - highMinCut, midMC30 = loggers30Periods - highMC30Periods - lowMC30Periods)
-mincut_bravo = mincut_bravo%>%gather(key = "MC.level", value = "NumLogMC", c(highMinCut, lowMinCut, midMC))%>%select(Period, MC.level, NumLogMC)
-levels(mincut_bravo$MC.level)
+mincut_bravo30 = endogInst_run_data%>%mutate(midMC = 100 - lowMinCut - highMinCut, midMC30 = loggers30Periods - highMC30Periods - lowMC30Periods, highMC = highMinCut, lowMC = lowMinCut)
+mincut_bravo30 = mincut_bravo30%>%mutate(new_midMC = midMC-midMC30, new_highMC = highMinCut - highMC30Periods, new_lowMC = lowMinCut - lowMC30Periods)
 
-mincut_bravo$MC.level <- ordered(mincut_bravo$MC.level, levels = c("midMC", "highMinCut", "lowMinCut"))
+mincut_bravo30 = mincut_bravo30%>%gather(key = "MC.level", value = "NumLogMC", c(highMC, lowMC, midMC30, new_midMC))%>%select(Period, MC.level, NumLogMC)
+levels(mincut_bravo30$MC.level)
 
-viz_minCutBravo = mincut_bravo%>%ggplot(aes(x = Period, y = NumLogMC))+
+mincut_bravo30$MC.level <- ordered(mincut_bravo30$MC.level, levels = c("midMC30","new_midMC","highMC", "lowMC"))
+
+labelHigh = expression(paste("High (", italic("minimal-cut"), " > 18)"))
+labelLow = expression(paste("Low (", italic("minimal-cut"), " < 2)"))
+
+viz_minCutBravo = mincut_bravo30%>%ggplot(aes(x = Period, y = NumLogMC))+
   geom_area(aes(fill = MC.level), size = line_size, alpha = 0.8)+
   labs(y = "Loggers (% of Total)")+
   setGraphs+
-  scale_fill_brewer(palette="Set2",breaks=c("midMC",  "highMinCut", "lowMinCut"),name=ax_mc, labels = c("Medium", "High (> 18)", "Low (< 2)"))
+  scale_fill_manual(breaks=c("new_midMC", "highMC", "lowMC"),name=ax_mc, labels = c("Not polarized", "High (> 18)", "Low (< 2)"), values = c(lighten(color3, amount = 0.3), color3, color1, color2))+
+  theme(legend.text.align = 0)
 
-ggsave("./figs/viz_mcPolarization_bravo.pdf", viz_minCutBravo, width=5.75, height=3, units="in")
+
+viz_minCutBravo
+
+if(savePlots) ggsave("./figs/viz_mcPolarization_bravo.pdf", viz_minCutBravo, width=5.75, height=3, units="in")
+fig = fig+1
 
 ```
 
+### Figure `r fig`
 Single run with tolerance-threshold = 1/3 bmax - the current-institution oscillates indefinitely 
 parameters: endogenous institution, base parameters (bmax = 20), 100,000 ticks 
 ```{r oneThirdBmax}
@@ -155,10 +179,13 @@ viz_oneThirdBmax_zoomed = oneThirdBmaxData%>%filter(period >= 6100, period<= 630
   setGraphs
 viz_oneThirdBmax_zoomed
 
-ggsave("./figs/viz_oneThirdBmax_zoomed.pdf", viz_oneThirdBmax_zoomed, width=4, height=3, units="in")
+if(savePlots) ggsave("./figs/viz_oneThirdBmax_zoomed.pdf", viz_oneThirdBmax_zoomed, width=4, height=3, units="in")
+fig = fig+1
+
 
 ```
 
+### Figure `r fig`
 Kf vs BM scatter plot
 ```{r vallino_kfBM}
 allData1_vallino<-allData_vallino%>%mutate(categories=ifelse(variableValue==300, "log300", ifelse(param=="enf" & variableValue==100, "enf100", 0)))
@@ -175,11 +202,12 @@ viz_vallinoKf=allData1_vallino%>%ggplot(aes(K, TotalBM*100, color=categories))+
 
 viz_vallinoKf
 
-ggsave("./figs/viz_vallinoKf.pdf", viz_vallinoKf, width=5.75, height=3, units="in")
+if(savePlots) ggsave("./figs/viz_vallinoKf.pdf", viz_vallinoKf, width=5.75, height=3, units="in")
+fig = fig+1
 
 ```
 
-
+### Figure `r fig`
 Logger removal 
 ```{r loggerRemoval}
 logger_removal_data = read.csv("./allData_IS/log1000.csv")%>%mutate(cummulativeCheaters=cumsum(numCheaters), period = 1:2001)
@@ -194,11 +222,13 @@ viz_removalLoggers=logger_removal_data[1:700,]%>%ggplot(aes(x=period))+
   theme(legend.title = element_blank())+
   colorDiscrete
 
-ggsave("./figs/viz_removalLoggers.pdf", viz_removalLoggers, width=5.5, height=2.5, units="in")
+if(savePlots) ggsave("./figs/viz_removalLoggers.pdf", viz_removalLoggers, width=5.5, height=2.5, units="in")
 viz_removalLoggers
+fig = fig+1
 
 ```
 
+### Figure `r fig`
 Vallino's monitoring doesn't matter 
 ```{r}
 enfGraph=enfData_vallino%>%mutate(enfValue=rev(as.factor((as.numeric(variableValue)-1)/10)))
@@ -208,14 +238,15 @@ viz_surv = enfGraph%>% filter(enfValue == 0.2|enfValue == 0.8)%>%ggplot(aes(x = 
   setGraphs+
   colorDiscrete
 
-ggsave("./figs/viz_vallino_mon.pdf", viz_surv, width=5.75, height=3, units="in")
+if(savePlots) ggsave("./figs/viz_vallino_mon.pdf", viz_surv, width=5.75, height=3, units="in")
+fig = fig+1
 
 ```
 
 ## My model 
 
-
-relationship between K and BM
+### Figure `r fig`
+relationship between K and BM - base data 
 ```{r m&s_kBM}
 numberJumps<-findKJumps(dataBase, seq(1,6, by=1), 2000, 50)
 whenFinalJump<-findFinalKJumps(dataBase, seq(1,6, by=1), 2000, 50)
@@ -245,7 +276,15 @@ kBM_base_plot<-baseJumpData%>%ggplot(aes(K, TotalBM*100))+
   
 kBM_base_plot
 
-# transparent? 
+
+if(savePlots) ggsave("./figs/viz_kBM_base.pdf", kBM_base_plot, width=4.5, height=2.5, units="in")
+fig = fig+1
+
+```
+
+### Figure `r fig`
+relationship between K and BM - all data 
+```{r}
 kBM_allData_plot<-allData_plotK_BM%>%ggplot(aes(K, TotalBM*100, color=logger60))+ 
   geom_point()+
   xlim(0,20)+ ylim(0,45)+
@@ -256,11 +295,11 @@ kBM_allData_plot<-allData_plotK_BM%>%ggplot(aes(K, TotalBM*100, color=logger60))
   guides(color = guide_legend(override.aes = list(size = 3)))
 
 #grid.arrange(kBM_allData_plot2, kBM_allData_plot)
+if(savePlots) ggsave("./figs/viz_kBM_allData.pdf", kBM_allData_plot, width=5, height=2.5, units="in")
 
-ggsave("./figs/viz_kBM_base.pdf", kBM_base_plot, width=4.5, height=2.5, units="in")
-ggsave("./figs/viz_kBM_allData.pdf", kBM_allData_plot, width=5, height=2.5, units="in")
+```
 
-
+```{r}
 corr_base = round(cor(baseData$TotalBM, baseData$K), 3)
 corr_all = round(cor(allData$TotalBM, allData$K), 3)
 corr_all_logNot60 = round(cor((allData_plotK_BM%>%filter(!logger60))$TotalBM, (allData_plotK_BM%>%filter(!logger60))$K)
@@ -272,11 +311,37 @@ print(paste("Correlation for all data, excluding simulations starting with 60 Lo
 
 ```
 
+
+### Figure `r fig`
 reference-threshold and final-institution relationship scatterplot - with lines of best fit 
+calculating jumps 
+```{r}
+x<-maxK(dataRT, seq(1,10, by=1), 2000, 50)
+
+#jumps_test<-findKJumps(dataRT, seq(1,10, by=1), 2000, 50)
+numberJumps<-findKJumps(dataRT, seq(1,10, by=1), 2000, 50)
+whenFinalJump<-findFinalKJumps(dataRT, seq(1,10, by=1), 2000, 50)
+
+numberJumps2<-numberJumps%>%gather(key="variableValue", value=variableOfInterest)%>%separate(col = variableValue, into = c("type", "variableValue"))
+
+jumpDF<-data.frame(maxK=x, jumps=numberJumps2$variableOfInterest, K=rtData$K, TotalBM=rtData$TotalBM, variableValue=rtData$variableValue, cheaters=rtData$numCheaters)
+
+whenFinalJump2<-whenFinalJump%>%gather(key="variableValue", value=variableOfInterest)%>%separate(col = variableValue, into = c("type", "variableValue"))
+rtJumpData<-data.frame(maxK=x, numJumps = numberJumps2$variableOfInterest, finalJump=whenFinalJump2$variableOfInterest, K=rtData$K, TotalBM=rtData$TotalBM, variableValue=rtData$variableValue, cheaters=rtData$numCheaters)
+
+rtJumpData<- rtJumpData%>%mutate(recentMeeting = finalJump>20)
+rtJumpData<- rtJumpData%>%mutate(jumpCat = ifelse(as.numeric(numJumps)<2,"once", ifelse(as.numeric(numJumps)<3, "twice","3+ times")))%>%mutate(jumpCat=factor(jumpCat))
+
+fig = fig+1
+
+```
+
+### Figure `r fig`
+rt scatterplot
 ```{r m&s_rt_kf}
 x = lm(rtJumpData$K~ as.numeric(rtJumpData$variableValue))
 summary(x)
-  viz_rt_jump=rtJumpData%>%ggplot(aes(x = as.numeric(variableValue)/10, y = K, color=jumpCat))+
+viz_rt_jump=rtJumpData%>%ggplot(aes(x = as.numeric(variableValue)/10, y = K, color=jumpCat))+
   geom_point(aes(shape=recentMeeting, size=recentMeeting), position="jitter")+
   geom_smooth(method='lm', se = FALSE, show.legend = FALSE)+ 
   scale_color_brewer(palette="Set2",breaks=c("once", "twice", "3+ times"),name="Number of meetings", labels = c("1", "2", "3+"))+
@@ -287,12 +352,13 @@ summary(x)
   guides(color = guide_legend(override.aes = list(size = 3)), shape = guide_legend(override.aes = list(size = 3)), size=FALSE)
 viz_rt_jump
 
-ggsave("./figs/viz_rtJump.pdf", viz_rt_jump, width=5.75, height=3, units="in")
+if(savePlots) ggsave("./figs/viz_rtJump.pdf", viz_rt_jump, width=5.75, height=3, units="in")
 
+fig = fig+1
 
 ```
 
-
+### Figure `r fig`
 monitoring and sanctioning scatterplots, with mon/sanc = 0.2 and 0.8
 ```{r m&s_monSanc}
 viz_mon_2_8 = monitoringData%>% filter(variableValue == 20| variableValue == 80)%>%ggplot(aes(x= K, y = TotalBM*100))+
@@ -322,7 +388,9 @@ viz_sanc_2_8 = sanctionData%>% filter(variableValue == 2| variableValue == 8)%>%
 
 viz_monSanc_2_8=grid.arrange(arrangeGrob(arrangeGrob(viz_mon_2_8+ggtitle("a)"),viz_sanc_2_8+ggtitle("b)"), ncol=2, nrow=1)))
 
-ggsave("./figs/viz_monSanc.2.8.pdf", viz_monSanc_2_8, width=6, height=3, units="in")
+if(savePlots) ggsave("./figs/viz_monSanc.2.8.pdf", viz_monSanc_2_8, width=6, height=3, units="in")
+
+fig = fig+1
 
 ```
 

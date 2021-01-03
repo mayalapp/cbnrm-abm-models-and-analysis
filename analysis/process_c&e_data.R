@@ -10,10 +10,6 @@ load("./allData_IS/vallinoData/vallino_changeRT.RData")
 vallino_dataRT<-dataOut
 load("./allData_IS/vallinoData/vallino_changeEnf.RData")
 vallino_dataEnf <-dataOut
-#setwd("~/Documents/WoosterStuff/fall2019/IS_organized")
-
-load("./allData_IS/vallino_removed_rt.RData")
-vallino_data_removed_rt <- dataOut
 
 costData_vallino<-finalStats_allOutputs(vallino_dataCost, seq(0,20, by=2),  2000, 50)
 mtgData_vallino<-finalStats_allOutputs(vallino_dataMTG, seq(5,30, by=5), 2000, 50)
@@ -22,7 +18,7 @@ rtData_vallino<-finalStats_allOutputs(vallino_dataRT, seq(1,10, by=1),  2000, 50
 enfData_vallino<-finalStats_allOutputs(vallino_dataEnf, seq(0,100, by=10), 2000, 50)
 enfData_vallino<-finalStats_allOutputs(vallino_dataEnf, seq(0,100, by=10), 2000, 50)
 
-removedRTData_vallino<-finalStats_allOutputs_extra(vallino_data_removed_rt, c(50), 2000, 50)
+#removedRTData_vallino<-finalStats_allOutputs_extra(vallino_data_removed_rt, c(50), 2000, 50)
 
 mtgData_vallino<-mtgData_vallino%>%mutate(param="mtg")
 costData_vallino<-costData_vallino%>%mutate(param="cost")
