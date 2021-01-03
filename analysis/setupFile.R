@@ -1,12 +1,6 @@
 ###############################
 #setup
-
-library(ggplot2)
-library(dplyr)
-library(tidyr)
-library(stringr)
-library(stats)
-
+setwd("~/Documents/WoosterStuff/fall2019/IS_organized/analysis")
 
 ## functions code
 
@@ -83,7 +77,7 @@ finalStatsDataframe <- function(dataIn, variableValues, variableOfInterest, tick
 
 
 finalStats_allOutputs <- function(dataIn, paramVals, ticks, runs){
-  # final, %loggers, average last 10?, % orig, %orig, final, final, average last 10?, average last 10?, %orig, %loggers 
+
   modelOutputs<- c("K", "unsatisfied", "Payoffs", "TotalBM", "GreenPatches", "beta.i", "k.i", "numLoggers", "numCheaters")
   percOutput <- c("final", "final", "final", "perc", "perc", "final", "final", "perc", "final")
   
@@ -100,7 +94,7 @@ finalStats_allOutputs <- function(dataIn, paramVals, ticks, runs){
 }
 
 finalStats_allOutputs_extra <- function(dataIn, paramVals, ticks, runs){
-  # final, %loggers, average last 10?, % orig, %orig, final, final, average last 10?, average last 10?, %orig, %loggers 
+
   modelOutputs<- c("K", "unsatisfied", "Payoffs", "TotalBM", "GreenPatches", "beta.i", "k.i", "numLoggers", "numCheaters", "highMinCut", "lowMinCut", "avgRTremoved")
   percOutput <- c("final", "final", "final", "perc", "perc", "final", "final", "perc", "final", "final", "final", "final")
   
