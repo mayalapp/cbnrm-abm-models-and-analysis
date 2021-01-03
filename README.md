@@ -1,4 +1,6 @@
-# cbnrm-abm-models-and-analysis
+# Cheating, monitoring, and sanctioning in an agent-based model of community resource management
+
+This repository contains the models, data, and analysis for the article "Cheating, monitoring, and sanctioning in an agent-based model of community resource management" 
 
 ## `simulations_and_model_code/`
 Folder containing model code and code used to run the sensitivity analysis simulations. Any single simulation runs were set up and run directly in NetLogo and exported via the NetLogo GUI (using NetLogo's `export plots` function) to a csv file. 
@@ -29,4 +31,4 @@ Folder containing the raw and cleaned data from the simulation runs.
 
 
 
-TODO: metadata info 
+TODO: metadata 
