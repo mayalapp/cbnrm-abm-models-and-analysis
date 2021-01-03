@@ -30,7 +30,7 @@ color="Set2"
 axlab_size <- 12
 axtick_size <- 10
   
-ax_kf = expression(paste(bolditalic("final-institution")))
+ax_kf = expression(paste(bolditalic("final-institution "),bold("("), K[f], bold(")")))
 axlab_bm<-"Biomass (% remaining)"
 axlab_density <- "Density"
 axlab_time <- "Period"
@@ -265,7 +265,7 @@ viz_vallinoKf=allData1_vallino%>%ggplot(aes(K, TotalBM*100, color=categories))+
   geom_point(alpha=0.7, size=2)+
   setGraphs+
   labs(x=ax_kf, y=axlab_bm)+
-  scale_color_brewer(palette="Set2", name="test", breaks=c("log300", "enf100", "0"), labels=c(expression(paste(italic("initial-loggers"), " = 300")), expression(paste(italic("surveillance-level"), " = 0")), "All other parameter sets"))+
+  scale_color_brewer(palette="Set2", name="test", breaks=c("log300", "enf100", "0"), labels=c(expression(paste(italic("initial-loggers"), " = 300")), expression(paste(italic("monitoring-level"), " = 0")), "All other parameter sets"))+
   #colorDiscrete+
   theme(legend.title=element_blank())
 

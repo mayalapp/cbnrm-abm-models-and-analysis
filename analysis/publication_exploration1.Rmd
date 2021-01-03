@@ -15,13 +15,14 @@ library(patchwork)
 library(ggforce)
 #library(pheatmap)
 library(ggpubr)
+library(colorspace)
 
 
 ```
 
 ```{r, warning=FALSE}
 source(file="setupFile2.R")
-source(file="setupVallino.R")
+source(file="setupVallino.R") # only working second time it is run???? 
 ```
 
 default graph settings 
@@ -30,7 +31,7 @@ color="Set2"
 axlab_size <- 12
 axtick_size <- 10
   
-ax_kf = expression(paste(bolditalic("final-institution")))
+ax_kf = expression(paste(bolditalic("final-institution "),bold("("), K[f], bold(")")))
 axlab_bm<-"Biomass (% remaining)"
 axlab_density <- "Density"
 axlab_time <- "Period"
@@ -38,6 +39,10 @@ axlab_perc <- "Percent remianing"
 ax_sanc = expression(bolditalic(sanction-level))
 ax_mon = expression(bolditalic(monitoring-level))
 ax_rt=expression(bolditalic("reference-threshold"))
+ax_surveillance=expression(bold(bolditalic("surveillance-level")))
+ax_mc=expression(bold(bolditalic("minimum-cut")))
+ax_k=expression(paste(bold(bolditalic("current-institution ")), bold("(K)")))
+
 
 
 # make graph look nice by adding this to the end 
@@ -129,7 +134,7 @@ summary(x)
   viz_rt_jump=rtJumpData%>%ggplot(aes(x = as.numeric(variableValue)/10, y = K, color=jumpCat))+
   geom_point(aes(shape=recentMeeting, size=recentMeeting), position="jitter")+
   geom_smooth(method='lm', se = FALSE, show.legend = FALSE)+ 
-  scale_color_brewer(palette="Dark2",breaks=c("once", "twice", "3+ times"),name="Number of meetings", labels = c("1", "2", "3+"))+
+  scale_color_brewer(palette="Set2",breaks=c("once", "twice", "3+ times"),name="Number of meetings", labels = c("1", "2", "3+"))+
   scale_shape(name="", breaks=c(TRUE, FALSE), labels=c("Recent meeting", "No recent meeting"))+
   scale_size_manual(breaks=c(TRUE, FALSE), values=c(2.5,1.5))+
   labs(x=ax_rt, y=ax_kf)+
@@ -143,7 +148,6 @@ ggsave("./figs/viz_rtJump.pdf", viz_rt_jump, width=5.75, height=3, units="in")
 ```
 colored surveilance (not using)
 ```{r}
-ax_surveillance=expression(bold(bolditalic("surveillance-level")))
 enfGraph=enfData_vallino%>%mutate(enfValue=rev(as.factor((as.numeric(variableValue)-1)/10)))
 enfGraph%>%ggplot(aes(x=(enfValue), y=TotalBM*100))+geom_point(aes(color = numLoggers), alpha = 0.7, size = 4)+
   labs(y=axlab_bm, x=ax_surveillance)+
@@ -155,45 +159,62 @@ monitoring and sanctioning do matter, after considering K
 viz_mon_2_8 = monitoringData%>% filter(variableValue == 20| variableValue == 80)%>%ggplot(aes(x= K, y = TotalBM*100))+
   geom_point(aes(color = variableValue))+
   labs(color = ax_mon)+
+  ylab(axlab_bm)+
+  xlab(ax_kf)+
   setGraphs+
   colorDiscrete+
-  ylim(0,23)+
-  xlim(7.5,15)+
+  #ylim(0,23)+
+  #xlim(7.5,15)+
   theme(legend.position="bottom")
 
 
+#viz_sanc_2_8 = sanctionData%>% filter(variableValue == 2| variableValue == 8)%>%ggplot(aes(x= K, y = TotalBM*100))+
 viz_sanc_2_8 = sanctionData%>% filter(variableValue == 2| variableValue == 8)%>%ggplot(aes(x= K, y = TotalBM*100))+
   geom_point(aes(color = as.factor(as.numeric(as.character(variableValue))/10)))+
   labs(color = ax_sanc)+
+  ylab(axlab_bm)+
+  xlab(ax_kf)+
   setGraphs+
   colorDiscrete+
-  ylim(0,23)+
-  xlim(7.5,15)+
+  #ylim(4,21)+
+  #xlim(7.5,15)+
   theme(legend.position="bottom")
 
 
 viz_monSanc_2_8=grid.arrange(arrangeGrob(arrangeGrob(viz_mon_2_8+ggtitle("a)"),viz_sanc_2_8+ggtitle("b)"), ncol=2, nrow=1)))
 
-ggsave("./figs/viz_monSanc.2.8.pdf", viz_monSanc_2_8, width=5.75, height=6, units="in")
+ggsave("./figs/viz_monSanc.2.8.pdf", viz_monSanc_2_8, width=6, height=3, units="in")
 
 ```
 surveillance doesn't matter 
 ```{r}
 enfGraph=enfData_vallino%>%mutate(enfValue=rev(as.factor((as.numeric(variableValue)-1)/10)))
-enfGraph%>% filter(enfValue == 0.2|enfValue == 0.8)%>%ggplot(aes(x = numLoggers, y = TotalBM*100))+
-  geom_point(aes(color = enfValue))+
-  labs(color = "surveillance-level")
+viz_surv = enfGraph%>% filter(enfValue == 0.2|enfValue == 0.8)%>%ggplot(aes(x = numLoggers*100, y = TotalBM*100))+
+  geom_point(aes(color = enfValue), size = 2)+
+  labs(color = ax_mon, x = "Loggers (% remaining)", y = axlab_bm)+
+  setGraphs+
+  colorDiscrete
+
+ggsave("./figs/viz_vallino_mon.pdf", viz_surv, width=5.75, height=3, units="in")
+
 ```
 linear regressin models 
 ```{r}
-vallino_lm = lm(TotalBM*100 ~ numLoggers+K+as.numeric(variableValue), data = enfData_vallino)
+vallino_lm = lm(TotalBM*100 ~ numLoggers+K+as.numeric(as.character(variableValue)), data = enfData_vallino)
 summary(vallino_lm)
 
-monitoring_lm = lm(TotalBM*100 ~ K+as.numeric(variableValue), data = monitoringData)
+vallino_lm2 = lm(TotalBM*100 ~ numLoggers+as.numeric(as.character(variableValue)), data = enfData_vallino%>%filter(variableValue != 100))
+summary(vallino_lm2)
+
+monitoring_lm = lm(TotalBM*100 ~ K+as.numeric(as.character(variableValue)), data = monitoringData)
 summary(monitoring_lm)
 
-sanction_lm = lm(TotalBM*100 ~ K+as.numeric(variableValue), data = sanctionData)
+sanction_lm = lm(TotalBM*100 ~ K+as.numeric(as.character(variableValue)), data = sanctionData)
 summary(sanction_lm)
+
+mon_sanc_data = allData%>%filter(param == "monitoring" | param == "sanction")%>%mutate(monitoring = ifelse(param == "monitoring", as.numeric(as.character(variableValue)), 50), sanction = ifelse(param == "sanction", as.numeric(as.character(variableValue)), 5)/10 )
+mon_sanc_lm = lm(TotalBM*100 ~ K + monitoring + sanction, data = mon_sanc_data)
+summary(mon_sanc_lm)
 ```
 
 
@@ -462,7 +483,7 @@ endogInst_data = endogInst_data%>%mutate(TotalBM = TotalBM/maxBM)
 endogInst_run_data = endogInst_data%>%filter(Period <= 200)
 
 
-ax_k = expression(paste(bolditalic("current-institution")))
+#ax_k = expression(paste(bolditalic("current-institution")))
 v1b<-endogInst_run_data%>%ggplot(aes(x=Period))+
   geom_path(aes(y=K),  size=line_size)+
   labs(x=element_blank(), y=ax_k)+
@@ -493,34 +514,125 @@ v4b<-endogInst_run_data%>%ggplot(aes(x=Period))+
   ylim(0,100)+
   setGraphs
 
-v5b <- endogInst_run_data%>%ggplot(aes(x = Period))+
-  geom_path(aes(y = highMinCut),  size=line_size)+
-  geom_path(aes(y = lowMinCut),  size=line_size, color = "green")+
-  geom_path(aes(y = 100 - lowMinCut - highMinCut),  size=line_size, color = "blue")+
-  geom_vline(xintercept = instChange, linetype="dashed", color="dimgrey")+
-  labs(x="", y="Loggers (% Total)")+
-  ylim(0,100)+ 
-  xlab("Period")+
-  setGraphs
-
-v6b <- endogInst_run_data%>%ggplot(aes(x = Period))+
-  #geom_path(aes(y = loggers30Periods),  size=line_size, color = "grey")+
-  geom_path(aes(y = highMC30Periods/loggers30Periods*100),  size=line_size)+
-  geom_path(aes(y = lowMC30Periods/loggers30Periods*100),  size=line_size, color = "green")+
-  geom_path(aes(y = (loggers30Periods - highMC30Periods - lowMC30Periods)/loggers30Periods*100),  size=line_size, color = "blue")+
-  geom_vline(xintercept = instChange, linetype="dashed", color="dimgrey")+
-  labs(x="", y="Loggers (% Not Replaced in 30 Periods)")+
-  ylim(0,100)+
-  setGraphs
 
 viz_bravo=grid.arrange(v1b+ggtitle("a)"), v2b+ggtitle("b)"), v4b+ggtitle("c)"), v3b+ggtitle("d)"), nrow=2)
 viz_bravo=annotate_figure(viz_bravo,
                 bottom = text_grob(expression(bold(Period)), vjust = 0,  size = axlab_size),
 )
 
-ggsave("./figs/viz_bravo2.pdf", viz_bravo, width=5.75, height=8, units="in")
+ggsave("./figs/viz_bravo2.pdf", viz_bravo, width=5.75, height=4, units="in")
 
-v5b
+
+```
+
+looking at minimal cut polarization - bravo data 
+```{r}
+mincut_bravo = endogInst_run_data%>%mutate(midMC = 100 - lowMinCut - highMinCut, midMC30 = loggers30Periods - highMC30Periods - lowMC30Periods)
+mincut_bravo = mincut_bravo%>%gather(key = "MC.level", value = "NumLogMC", c(highMinCut, lowMinCut, midMC))%>%select(Period, MC.level, NumLogMC)
+#mincut_bravo = mincut_bravo%>%arrange(desc(MC.level))
+levels(mincut_bravo$MC.level)
+
+mincut_bravo$MC.level <- ordered(mincut_bravo$MC.level, levels = c("midMC", "highMinCut", "lowMinCut"))
+
+viz_minCutBravo = mincut_bravo%>%ggplot(aes(x = Period, y = NumLogMC))+
+  geom_area(aes(fill = MC.level), size = line_size, alpha = 0.8)+
+  labs(y = "Loggers (% of Total)")+
+  setGraphs+
+  scale_fill_brewer(palette="Set2",breaks=c("midMC",  "highMinCut", "lowMinCut"),name=ax_mc, labels = c("Medium", "High (> 18)", "Low (< 2)"))
+
+ggsave("./figs/viz_mcPolarization_bravo.pdf", viz_minCutBravo, width=5.75, height=3, units="in")
+
+# showing number of loggers with different minimal cuts
+#v5b <- mincut_bravo%>%ggplot(aes(x = Period))+
+#mincut_bravo%>%ggplot(aes(x = Period))+
+#  geom_path(aes(y = highMinCut),  size=line_size)+
+#  geom_path(aes(y = lowMinCut),  size=line_size, color = "green")+
+#  geom_path(aes(y = midMC),  size=line_size, color = "blue")+
+#  geom_vline(xintercept = instChange, linetype="dashed", color="dimgrey")+
+#  labs(x="", y="Loggers (% Total)")+
+#  ylim(0,100)+ 
+#  xlab("Period")+
+#  setGraphs
+
+# showing number of loggers with different minimal cuts (only loggers that have been around at least 30 periods)
+#v6b <- endogInst_run_data%>%ggplot(aes(x = Period))+
+#  #geom_path(aes(y = loggers30Periods),  size=line_size, color = "grey")+
+#  geom_path(aes(y = highMC30Periods/loggers30Periods*100),  size=line_size)+
+#  geom_path(aes(y = lowMC30Periods/loggers30Periods*100),  size=line_size, color = "green")+
+#  geom_path(aes(y = midMC30),  size=line_size, color = "blue")+
+#  geom_vline(xintercept = instChange, linetype="dashed", color="dimgrey")+
+#  labs(x="", y="Loggers (% Not Replaced in 30 Periods)")+
+#  ylim(0,100)+
+#  setGraphs
+
+
+```
+
+looking at loggers around for at more than 30 periods
+```{r}
+mincut_bravo30 = endogInst_run_data%>%mutate(midMC = 100 - lowMinCut - highMinCut, midMC30 = loggers30Periods - highMC30Periods - lowMC30Periods)
+mincut_bravo30 = mincut_bravo30%>%mutate(midMC30 = midMC30/loggers30Periods*100,highMC30Periods = highMC30Periods/loggers30Periods*100, lowMC30Periods = lowMC30Periods/loggers30Periods *100)
+mincut_bravo30 = mincut_bravo30%>%gather(key = "MC.level30", value = "NumLogMC30", c(highMC30Periods, lowMC30Periods, midMC30))%>%select(Period, MC.level30, NumLogMC30)
+levels(mincut_bravo30$MC.level30)
+
+mincut_bravo30$MC.level30 <- ordered(mincut_bravo30$MC.level30, levels = c("midMC30", "highMC30Periods", "lowMC30Periods"))
+
+mincut_bravo30%>%ggplot(aes(x = Period, y = NumLogMC30))+
+  geom_area(aes(fill = MC.level30), size = line_size, alpha = 0.8)+
+  labs(y = "Loggers (% of Total)")+
+  setGraphs+
+  scale_fill_brewer(palette="Set2",breaks=c("midMC30",  "highMC30Periods", "lowMC30Periods"),name=ax_mc, labels = c("Medium", "High (> 18)", "Low (< 2)"))
+
+mincut_bravo%>%ggplot(aes(x = Period, y = NumLogMC))+
+  geom_area(aes(fill = MC.level), size = line_size, alpha = 0.8)+
+  labs(y = "Loggers (% of Total)")+
+  setGraphs+
+  scale_fill_brewer(palette="Set2",breaks=c("midMC",  "highMinCut", "lowMinCut"),name=ax_mc, labels = c("Medium", "High (> 18)", "Low (< 2)"))
+```
+
+looking at loggers around for at more than 30 periods AND newer loggers combined
+BEST ONE RIGHT NOW! 
+```{r}
+mincut_bravo30 = endogInst_run_data%>%mutate(midMC = 100 - lowMinCut - highMinCut, midMC30 = loggers30Periods - highMC30Periods - lowMC30Periods, highMC = highMinCut, lowMC = lowMinCut)
+mincut_bravo30 = mincut_bravo30%>%mutate(new_midMC = midMC-midMC30, new_highMC = highMinCut - highMC30Periods, new_lowMC = lowMinCut - lowMC30Periods)
+
+mincut_bravo30 = mincut_bravo30%>%gather(key = "MC.level", value = "NumLogMC", c(highMC, lowMC, midMC30, new_midMC))%>%select(Period, MC.level, NumLogMC)
+levels(mincut_bravo$MC.level)
+
+mincut_bravo30$MC.level <- ordered(mincut_bravo30$MC.level, levels = c("midMC30","new_midMC","highMC", "lowMC"))
+
+labelHigh = expression(paste("High (", italic("minimal-cut"), " > 18)"))
+labelLow = expression(paste("Low (", italic("minimal-cut"), " < 2)"))
+
+# USING THIS IN PAPER FOR THE MOMENT 
+viz_minCutBravo = mincut_bravo30%>%ggplot(aes(x = Period, y = NumLogMC))+
+  geom_area(aes(fill = MC.level), size = line_size, alpha = 0.8)+
+  labs(y = "Loggers (% of Total)")+
+  setGraphs+
+  scale_fill_manual(breaks=c("new_midMC", "highMC", "lowMC"),name=ax_mc, labels = c("Not polarized", "High (> 18)", "Low (< 2)"), values = c(lighten(color3, amount = 0.3), color3, color1, color2))+
+  theme(legend.text.align = 0)
+
+# test = endogInst_run_data%>%mutate(period = 1:200, midMC = 100 - lowMinCut - highMinCut, midMC30 = loggers30Periods - highMC30Periods - lowMC30Periods, highMC = highMinCut, lowMC = lowMinCut)
+# test%>%filter(period > 30)%>%summarize(median(midMC30))
+
+  ggsave("./figs/viz_mcPolarization_bravo.pdf", viz_minCutBravo, width=5.75, height=3, units="in")
+```
+
+```{r}
+mincut_bravo30 = endogInst_run_data%>%mutate(midMC = 100 - lowMinCut - highMinCut, midMC30 = loggers30Periods - highMC30Periods - lowMC30Periods, highMC = highMinCut, lowMC = lowMinCut)
+mincut_bravo30 = mincut_bravo30%>%mutate(new_midMC = midMC-midMC30, new_highMC = highMinCut - highMC30Periods, new_lowMC = lowMinCut - lowMC30Periods)
+
+mincut_bravo30 = mincut_bravo30%>%gather(key = "MC.level", value = "NumLogMC", c(highMC30Periods, lowMC30Periods, midMC30, new_midMC, new_highMC, new_lowMC))%>%select(Period, MC.level, NumLogMC)
+levels(mincut_bravo$MC.level)
+mincut_bravo30$MC.level <- ordered(mincut_bravo30$MC.level, levels = c("midMC30","new_midMC", "highMC30Periods","new_highMC", "lowMC30Periods", "new_lowMC"))
+
+#mincut_bravo30 = mincut_bravo30%>%mutate(new = grepl("new", .$MC.level))
+
+mincut_bravo30%>%ggplot(aes(x = Period, y = NumLogMC))+
+  geom_area(aes(fill = MC.level, pattern = new), size = line_size, alpha = 0.8)+
+  labs(y = "Loggers (% of Total)")+
+  setGraphs+
+  scale_fill_manual(breaks=c("midMC30","new_midMC", "highMC30Periods","new_highMC", "lowMC30Periods", "new_lowMC"),name=ax_mc, labels = c("Medium", "Medium (new Loggers)", "High","High (new Loggers)", "Low", "Low (new Loggers)" ), values = c(lighten(color3, amount = 0.3), color3, lighten(color1, amount = 0.3), color1, lighten(color2, amount = 0.3), color2))
 
 ```
 
@@ -528,17 +640,48 @@ Checking steady state of TotalBM
 ```{r}
 test_deviation = endogInst_data%>%filter(Period > 200)
 
-test_mean = mean(test_deviation$TotalBM)
-test_sd = sd(test_deviation$TotalBM)
+test_mean = mean(test_deviation$TotalBM*100)
+test_sd = sd(test_deviation$TotalBM*100)
 test_mean
 test_sd
 
-test_deviation%>%ggplot(aes(x = TotalBM))+
-  geom_histogram()+
-  geom_vline(xintercept = test_mean)
+viz_bmDeviation = test_deviation%>%ggplot(aes(x = TotalBM*100))+
+  geom_histogram(fill = color3)+
+  geom_vline(xintercept = test_mean, linetype = "dashed")+
+  setGraphs+
+  labs(y = "# Runs", x = axlab_bm)
+
+ggsave("./figs/viz_bmDeviation_bravo.pdf", viz_bmDeviation, width=4, height=3, units="in")
 
 ```
 
+
+
+parameters: endogenous institution, base parameters (bmax = 20), 100,000 ticks 
+```{r}
+bmax = 20
+oneThirdBmaxData = read_csv("./allData_IS/one-third-bmax.csv")
+oneThirdBmaxData
+
+viz_oneThirdBmax_full = oneThirdBmaxData%>%ggplot(aes(x = period, y = K))+
+  geom_line()+
+  geom_hline(yintercept = 1/3 * bmax, color = "blue")+
+  geom_hline(yintercept = 2/3 * bmax, color = "blue")+
+  setGraphs
+
+viz_oneThirdBmax_zoomed = oneThirdBmaxData%>%filter(period >= 6100, period<= 6300)%>%ggplot(aes(x = period, y = K))+
+  geom_hline(yintercept = 1/3 * bmax, color = color2, size = 1.5)+
+  geom_hline(yintercept = 2/3 * bmax, color = color2, size = 1.5)+
+  geom_line()+
+  labs(x = "Period", y = ax_kf)+
+  setGraphs
+viz_oneThirdBmax_zoomed
+
+ggsave("./figs/viz_oneThirdBmax_zoomed.pdf", viz_oneThirdBmax_zoomed, width=4, height=3, units="in")
+ggsave("./figs/viz_oneThirdBmax_full.pdf", viz_oneThirdBmax_full, width=4, height=3, units="in")
+
+
+```
 
 
 ```{r}

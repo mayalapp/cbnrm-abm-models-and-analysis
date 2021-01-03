@@ -16,7 +16,7 @@ library(stats)
 # runs is number of times the simulation was run 
 #dataIn is list with all of the lists from the simulation, e.g. data1<-list(log200, log300)
 makeDF<- function(dataIn, varName, paramSet, ticks, runs){
-  output<-data.frame(1:(ticks/10))
+  output<-data.frame(1:(as.integer(ticks/10)))
   for(j in 1: length(paramSet)){
     for(i in 1:runs){
       output[paste(paramSet[j], i, sep='.')] <- dataIn[[j]][[i]][varName]
@@ -57,7 +57,7 @@ finalStatsDataframe <- function(dataIn, variableValues, variableOfInterest, tick
     x<-t(out[1,(runs*(i-1)+1):(runs*i)]); colnames(x)<-paste("ini", varNames[i], sep=".")
     out1[,paste("ini", varNames[i], sep=".")] <- x
     
-    x<-t(out[ticks/10,(runs*(i-1)+1):(runs*i)]); colnames(x)<-paste("final", varNames[i], sep=".")
+    x<-t(out[as.integer(ticks/10),(runs*(i-1)+1):(runs*i)]); colnames(x)<-paste("final", varNames[i], sep=".")
     out1[,paste("final", varNames[i], sep=".")] <- x
   }
   out1<-out1[,-1]
@@ -130,8 +130,8 @@ findKJumps<-function(dataIn, variableValues, ticks, runs){
   
   for(k in 1:length(variableValues)){
     for(j in (runs*(k-1)+1):(runs*k)){
-      jump<-rep(0, times=ticks/10)
-      for(i in 1:((ticks/10)-1)){
+      jump<-rep(0, times=as.integer(ticks/10))
+      for(i in 1:((as.integer(ticks/10))-1)){
         if(dataFormatted[i+1,j]!=dataFormatted[i,j]){
           if(dataFormatted[i+1,j]<dataFormatted[i,j]){
             jump[i+1]<- -1
@@ -168,8 +168,8 @@ findFinalKJumps<-function(dataIn, variableValues, ticks, runs){
   
   for(k in 1:length(variableValues)){
     for(j in (runs*(k-1)+1):(runs*k)){
-      jump<-rep(0, times=ticks/10)
-      for(i in 1:((ticks/10)-1)){
+      jump<-rep(0, times=as.integer(ticks/10))
+      for(i in 1:((as.integer(ticks/10))-1)){
         if(dataFormatted[i+1,j]!=dataFormatted[i,j]){
           if(dataFormatted[i+1,j]<dataFormatted[i,j]){
             jump[i+1]<- -1
@@ -253,7 +253,7 @@ findKJumpTimes<-function(dataIn, variableValues, ticks, runs){
   
   for(k in 1:length(variableValues)){
     for(j in (runs*(k-1)+1):(runs*k)){
-      for(i in 2:((ticks/10)-1)){
+      for(i in 2:((as.integer(ticks/10))-1)){
         if(dataFormatted[i+1,j]==dataFormatted[i,j]){
           x2[i+1,j]= 0
         }
@@ -285,7 +285,7 @@ findBMJumpTimes<-function(dataIn, variableValues, ticks, runs){
   
   for(k in 1:length(variableValues)){
     for(j in (runs*(k-1)+1):(runs*k)){
-      for(i in 6:((ticks/10)-6)){
+      for(i in 6:((as.integer(ticks/10))-6)){
         test = mean(dataFormatted[(i+1):(i+3),j])-mean(dataFormatted[(i-3):i,j])
         if(abs(test)<1000){
           x2[i+1,j]= 0
@@ -304,7 +304,7 @@ findBMJumpTimes<-function(dataIn, variableValues, ticks, runs){
   
   
   x2[1:6,]=-1
-  x2[(ticks/10-5):(ticks/10),]=0
+  x2[(as.integer(ticks/10)-5):(as.integer(ticks/10)),]=0
   
   return(x2)
 }
@@ -432,13 +432,13 @@ getGraphs_export <- function(fileName, colNames){
   ticks = 2000
   i<-1
   j<-1
-  out<-data.frame(1:(ticks/10))
+  out<-data.frame(1:(as.integer(ticks/10)))
   while(i<dim(plotFile)[1]){
     if(plotFile[i,2]=="y"){
       
-      out[,plotFile[i-6,1]]<-plotFile[(i+1):(i+(ticks/10)),2]
+      out[,plotFile[i-6,1]]<-plotFile[(i+1):(i+(as.integer(ticks/10))),2]
       j<- j+1
-      i<- i+(ticks/10)
+      i<- i+(as.integer(ticks/10))
     }
     i<-i+1
   }

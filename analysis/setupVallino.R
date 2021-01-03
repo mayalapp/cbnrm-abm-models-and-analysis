@@ -38,3 +38,4 @@ allData_vallino<-allData_vallino%>%mutate(param=as.factor(param))
 
 # all simulations use base parameteres
 baseData_vallino<-allData_vallino%>%filter((param=="cost" & variableValue==5)|(param=="mtg" & variableValue==20)|(param=="rt" & variableValue==5)|(param=="log" & variableValue==100)|(param=="enf" & variableValue==50))
+
