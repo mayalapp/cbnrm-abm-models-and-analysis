@@ -5,8 +5,6 @@ JGR_runningNetLogo/notUsed
 JGR_runningNetLogo/openJGR
 IS_submission_stuff
 analysis/allData_IS/scrapped/
-analysis/setupFile2.R
-analysis/setupVallino.R
 analysis/IS_analysis/
 analysis/distributionOfCheaters.Rmd
 analysis/IS_analysis/.DS_Store
