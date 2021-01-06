@@ -6,8 +6,8 @@ library(tidyr)
 library(reshape2)
 
 #setwd("~/Documents/WoosterStuff/fall2019/IS_organized/analysis/allData_IS")
-load("./allData_IS/logger_and_bm_data.RData")
-load("./allData_IS/changeEnf_log1000.RData")
+load("./IS_analysis/additional_data/logger_and_bm_data.RData")
+load("./IS_analysis/additional_data/changeEnf_log1000.RData")
 
 
 getGraphs <- function(fileName){
@@ -82,7 +82,7 @@ varNames<- c( "log.1.", "log.8.")
 logEnfLog<-makeDF(data1, "numLoggers",varNames , 7000, 1)
 logEnfLog2<-ticksAsCols(logEnfLog)
 
-load("./allData_IS/noMaxTree.RData")
+load("./IS_analysis/additional_data/noMaxTree.RData")
 data1<-list(noMaxTree)
 varNames<- c( "bm")
 
@@ -99,7 +99,7 @@ noMT<- data.frame(bm=noMTbm, log=noMTlog)
 # fit model to LV eqs
 
 #load data 
-data1<-getGraphs("./allData_IS/fitToLV.csv") 
+data1<-getGraphs("./IS_analysis/additional_data/fitToLV.csv") 
 lvTest1<-data.frame(data1["TotalBM"], data1["numLoggers"])
 
 #set LV equation 

@@ -1,0 +1,1636 @@
+
+R version 3.6.0 (2019-04-26) -- "Planting of a Tree"
+Copyright (C) 2019 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+Loading required package: JGR
+Loading required package: rJava
+
+Loading required package: JavaGD
+starting httpd help server ... done
+> library(RNetLogo)
+Loading required package: igraph
+
+Attaching package: ‘igraph’
+
+The following objects are masked from ‘package:stats’:
+
+    decompose, spectrum
+
+The following object is masked from ‘package:base’:
+
+    union
+
+> library(tictoc)
+> setParam <- function(paramName, paramValue){
++ NLCommand(paste("set", paramName, paramValue, sep=" "))
++ }
+> # 1. Define a function that runs the simulation model
+> # for a given parameter combination and returns the
+> # value(s) of the fitting criteria.
+> sim <- function(params) {
++ # params is vector with: cost, max-tree-growth, initial-loggers
++ #    reference-threshold, enfocement-level
++ #  in that order!
++ # for now high-tolerance = "True"
++ 
++ # open NetLogo
++ nl.path <- "/Applications/NetLogo\ 6.0.4/Java"
++ NLStart(nl.path, gui=FALSE, nl.jarname =  "netlogo-6.0.4.jar")
++ # open Endogenous Enforcement model
++ model.path <-"/Applications/NetLogo\ 6.0.4/models/ISmodels/Vallino_NL6/code/Enforcement\ Endogenous\ Inst.nlogo"
++ NLLoadModel(model.path)
++ ticks <- 2000
++ runs <- 50
++ 
++ 
++ #set paramters
++ paramNames <- c("cost", "max-tree-growth", "initial-loggers", "reference-threshold", "enforcement-level")
++ for(i in 1:length(params)){
++ setParam(paramNames[i], params[i])
++ }
++ setParam("high-tolerance", "True") # for now always high tolerance
++ 
++ output <- data.frame()
++ for(i in 1:runs){
++ # run simulation
++ NLCommand("setup")
++ output[i,"iniBM"]<- NLReport("sum [trees] of patches")
++ NLDoCommand(ticks, "go")
++ output[i,"finalBM"] <- NLReport("sum [trees] of patches")
++ output[i,"finalPayoff"] <- NLReport("mean [payoff] of turtles")
++ }
++ return(output)
++ }
+> base.param <- c(5,20,100, 0.5, 50)
+> ###############################
+> #change cost
+> colNames <- vector()
+> dataCost <- data.frame(1:50)
+> for(j in 1:10){
++ newParams <- base.param
++ newParams[1] <- j*2
++ dataCost<-cbind(dataCost,sim(newParams))
++ 
++ save(dataCost, file=paste("changeCost", j, ".RData", sep=""))
++ }
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+> ###############################
+> #change max-tree-growth
+> colNames <- vector()
+> dataMTG <- data.frame(1:50)
+> for(j in 1:6){
++ newParams <- base.param
++ newParams[2] <- j*5
++ dataMTG<-cbind(dataMTG,sim(newParams))
++ 
++ save(dataMTG, file=paste("changeMTG", j, ".RData", sep=""))
++ }
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+> ###############################
+> #change loggers
+> colNames <- vector()
+> dataLog <- data.frame(1:50)
+> for(j in 1:6){
++ newParams <- base.param
++ newParams[3] <- j*50
++ dataLog<-cbind(dataLog,sim(newParams))
++ 
++ save(dataLog, file=paste("changeLoggers", j, ".RData", sep=""))
++ }
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+> ####################################
+> # reference threshold
+> colNames <- vector()
+> dataRT <- data.frame(1:50)
+> for(j in 1:10){
++ newParams <- base.param
++ newParams[4] <- j/10
++ dataRT<-cbind(dataRT,sim(newParams))
++ 
++ save(dataRT, file=paste("changeRT", j, ".RData", sep=""))
++ }
+> ###############################
+> #change enforcement
+> colNames <- vector()
+> dataEnf <- data.frame(1:50)
+> for(i in 1:10){
++ newParams <- base.param
++ newParams[5] <- i*10
++ dataEnf<-cbind(dataEnf,sim(newParams))
++ 
++ save(dataEnf, file=paste("changeEnf", i, ".RData", sep=""))
++ }
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+> #full-factorial design setup
+> #cost=c(1,5)
+> #maxTreeGrowth = c(10,20)
+> #loggers = c(0,50, seq(100,500,100))
+> #tol = c("True", "False")
+> #refThresh = seq(0,1,0.2)
+> #enf = seq(0,100,10)
+> #full.factorial.design <- expand.grid(cost, maxTreeGrowth, loggers, tol, refThresh, enf)
+> #sim.results <- apply(full.factorial.design, 1, sim)
+> extra<-data.frame(1:50)
+> extra$max<-sim(5,20,100,0.5,55)
+> extra$min<-sim(5,20,100,0.5,45)
+> save(extra, file="missedValueSA.RData")
+> extra<-data.frame(1:50)
+> extra$max<-sim(c(5,20,100,0.5,55))
+> extra$min<-sim(c(5,20,100,0.5,45))
+> save(extra, file="missedValueSA.RData")
+> extra
+   X1.50 max.iniBM max.finalBM max.finalPayoff min.iniBM
+1      1     40308     26871.5               0     40328
+2      2     40008     24750.0               0     40369
+3      3     40309     31890.5               0     40240
+4      4     40463     27995.5               0     40380
+5      5     40403     26077.5               0     40333
+6      6     40209     30684.5               0     40310
+7      7     40454     28630.5               0     40589
+8      8     40050     30656.5               0     40258
+9      9     40407     26992.5               0     40228
+10    10     40490     26327.5               0     40114
+11    11     40195     30131.0               0     40579
+12    12     40369     28327.0               0     40312
+13    13     40434     26533.0               0     40173
+14    14     40282     30248.0               0     40308
+15    15     40236     27040.5               0     40374
+16    16     40180     31563.5               0     39949
+17    17     40013     29730.0               0     40408
+18    18     40326     31758.0               0     40498
+19    19     39992     29641.0               0     40350
+20    20     40509     28694.5               0     40284
+21    21     40258     27526.0               0     40460
+22    22     40589     29006.5               0     40491
+23    23     40117     30396.5               0     40290
+24    24     40241     28528.0               0     40356
+25    25     40615     30137.0               0     40407
+26    26     40432     29797.5               0     40218
+27    27     40432     26376.5               0     40305
+28    28     40373     27800.0               0     40131
+29    29     40344     27763.0               0     40250
+30    30     40191     29400.5               0     40455
+31    31     40367     30436.5               0     40348
+32    32     40308     24969.5               0     40239
+33    33     40464     29207.0               0     40174
+34    34     40398     28447.0               0     40271
+35    35     40161     30732.5               0     40232
+36    36     40310     30010.5               0     39999
+37    37     39947     28571.0               0     40152
+38    38     40343     28083.5               0     40256
+39    39     40452     29764.5               0     40388
+40    40     40275     28695.0               0     40410
+41    41     40398     30090.0               0     40285
+42    42     40333     28992.0               0     40240
+43    43     40137     31776.5               0     40313
+44    44     40075     28217.0               0     40371
+45    45     40197     30309.0               0     40428
+46    46     40299     29227.0               0     40063
+47    47     40446     29214.0               0     40305
+48    48     40172     29352.0               0     40385
+49    49     40102     27742.5               0     40170
+50    50     40108     30946.0               0     40031
+   min.finalBM min.finalPayoff
+1      30881.0               0
+2      31904.5               0
+3      31431.0               0
+4      30165.5               0
+5      27835.0               0
+6      29014.5               0
+7      29775.5               0
+8      27648.0               0
+9      29797.0               0
+10     29499.5               0
+11     28820.5               0
+12     29998.0               0
+13     26668.5               0
+14     28328.0               0
+15     30342.0               0
+16     29557.0               0
+17     31899.5               0
+18     31527.5               0
+19     30069.0               0
+20     27312.5               0
+21     27254.0               0
+22     28507.5               0
+23     27340.5               0
+24     28944.0               0
+25     29882.5               0
+26     30222.0               0
+27     30526.0               0
+28     23869.5               0
+29     29060.0               0
+30     30350.0               0
+31     30151.0               0
+32     30382.0               0
+33     28113.0               0
+34     31266.5               0
+35     29143.0               0
+36     28488.5               0
+37     27436.5               0
+38     28587.0               0
+39     28729.0               0
+40     27918.0               0
+41     29536.0               0
+42     25397.5               0
+43     27894.5               0
+44     28947.0               0
+45     29134.0               0
+46     29767.0               0
+47     29109.0               0
+48     28800.5               0
+49     29792.0               0
+50     28634.0               0
+> library(RNetLogo)
+> library(tictoc)
+> setParam <- function(paramName, paramValue){
++ NLCommand(paste("set", paramName, paramValue, sep=" "))
++ }
+> # 1. Define a function that runs the simulation model
+> # for a given parameter combination and returns the
+> # value(s) of the fitting criteria.
+> sim <- function(params) {
++ # params is vector with: cost, max-tree-growth, initial-loggers
++ #    reference-threshold, enfocement-level
++ #  in that order!
++ # for now high-tolerance = "True"
++ 
++ # open NetLogo
++ nl.path <- "/Applications/NetLogo\ 6.0.4/Java"
++ NLStart(nl.path, gui=FALSE, nl.jarname =  "netlogo-6.0.4.jar")
++ # open Endogenous Enforcement model
++ model.path <-"/Applications/NetLogo\ 6.0.4/models/ISmodels/Vallino_NL6/code/Endogenous\ Institution.nlogo"
++ NLLoadModel(model.path)
++ ticks <- 2000
++ runs <- 50
++ 
++ 
++ #set paramters
++ paramNames <- c("cost", "max-tree-growth", "initial-loggers", "reference-threshold", "enforcement-level")
++ for(i in 1:length(params)){
++ setParam(paramNames[i], params[i])
++ }
++ setParam("high-tolerance", "True") # for now always high tolerance
++ 
++ output <- data.frame()
++ for(i in 1:runs){
++ # run simulation
++ NLCommand("setup")
++ output[i,"iniBM"]<- NLReport("sum [trees] of patches")
++ NLDoCommand(ticks, "go")
++ output[i,"finalBM"] <- NLReport("sum [trees] of patches")
++ output[i,"finalPayoff"] <- NLReport("mean [payoff] of turtles")
++ }
++ return(output)
++ }
+> base.param <- c(5,20,100, 0.5, 50)
+> ###############################
+> #change cost
+> colNames <- vector()
+> dataCost <- data.frame(1:50)
+> for(j in 1:10){
++ newParams <- base.param
++ newParams[1] <- j*2
++ dataCost<-cbind(dataCost,sim(newParams))
++ 
++ save(dataCost, file=paste("changeCost", j, ".RData", sep=""))
++ }
+[1] "Java-Object{Nothing named ENFORCEMENT-LEVEL has been defined. at position 37 in }"
+> ###############################
+> #change max-tree-growth
+> colNames <- vector()
+> dataMTG <- data.frame(1:50)
+> for(j in 1:6){
++ newParams <- base.param
++ newParams[2] <- j*5
++ dataMTG<-cbind(dataMTG,sim(newParams))
++ 
++ save(dataMTG, file=paste("changeMTG", j, ".RData", sep=""))
++ }
+[1] "Java-Object{Nothing named ENFORCEMENT-LEVEL has been defined. at position 37 in }"
+> ###############################
+> #change loggers
+> colNames <- vector()
+> dataLog <- data.frame(1:50)
+> for(j in 1:6){
++ newParams <- base.param
++ newParams[3] <- j*50
++ dataLog<-cbind(dataLog,sim(newParams))
++ 
++ save(dataLog, file=paste("changeLoggers", j, ".RData", sep=""))
++ }
+[1] "Java-Object{Nothing named ENFORCEMENT-LEVEL has been defined. at position 37 in }"
+> ####################################
+> # reference threshold
+> colNames <- vector()
+> dataRT <- data.frame(1:50)
+> for(j in 1:10){
++ newParams <- base.param
++ newParams[4] <- j/10
++ dataRT<-cbind(dataRT,sim(newParams))
++ 
++ save(dataRT, file=paste("changeRT", j, ".RData", sep=""))
++ }
+[1] "Java-Object{Nothing named ENFORCEMENT-LEVEL has been defined. at position 37 in }"
+> #full-factorial design setup
+> #cost=c(1,5)
+> #maxTreeGrowth = c(10,20)
+> #loggers = c(0,50, seq(100,500,100))
+> #tol = c("True", "False")
+> #refThresh = seq(0,1,0.2)
+> #enf = seq(0,100,10)
+> #full.factorial.design <- expand.grid(cost, maxTreeGrowth, loggers, tol, refThresh, enf)
+> #sim.results <- apply(full.factorial.design, 1, sim)
+> library(RNetLogo)
+> library(tictoc)
+> setParam <- function(paramName, paramValue){
++ NLCommand(paste("set", paramName, paramValue, sep=" "))
++ }
+> # 1. Define a function that runs the simulation model
+> # for a given parameter combination and returns the
+> # value(s) of the fitting criteria.
+> sim <- function(params) {
++ # params is vector with: cost, max-tree-growth, initial-loggers
++ #    reference-threshold, enfocement-level
++ #  in that order!
++ # for now high-tolerance = "True"
++ 
++ # open NetLogo
++ nl.path <- "/Applications/NetLogo\ 6.0.4/Java"
++ NLStart(nl.path, gui=FALSE, nl.jarname =  "netlogo-6.0.4.jar")
++ # open Endogenous Enforcement model
++ model.path <-"/Applications/NetLogo\ 6.0.4/models/ISmodels/Vallino_NL6/code/Enforcement\ Endogenous\ Inst.nlogo"
++ NLLoadModel(model.path)
++ ticks <- 2000
++ runs <- 50
++ 
++ 
++ #set paramters
++ paramNames <- c("cost", "max-tree-growth", "initial-loggers", "reference-threshold")
++ for(i in 1:length(params)){
++ setParam(paramNames[i], params[i])
++ }
++ setParam("high-tolerance", "True") # for now always high tolerance
++ 
++ output <- data.frame()
++ for(i in 1:runs){
++ # run simulation
++ NLCommand("setup")
++ output[i,"iniBM"]<- NLReport("sum [trees] of patches")
++ NLDoCommand(ticks, "go")
++ output[i,"finalBM"] <- NLReport("sum [trees] of patches")
++ }
++ return(output)
++ }
+> base.param <- c(5,20,100, 0.5)
+> ###############################
+> #change cost
+> colNames <- vector()
+> dataCost <- data.frame(1:50)
+> for(j in 1:10){
++ newParams <- base.param
++ newParams[1] <- j*2
++ dataCost<-cbind(dataCost,sim(newParams))
++ 
++ save(dataCost, file=paste("changeCost", j, ".RData", sep=""))
++ }
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+> ###############################
+> #change max-tree-growth
+> colNames <- vector()
+> dataMTG <- data.frame(1:50)
+> for(j in 1:6){
++ newParams <- base.param
++ newParams[2] <- j*5
++ dataMTG<-cbind(dataMTG,sim(newParams))
++ 
++ save(dataMTG, file=paste("changeMTG", j, ".RData", sep=""))
++ }
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+> ###############################
+> #change loggers
+> colNames <- vector()
+> dataLog <- data.frame(1:50)
+> for(j in 1:6){
++ newParams <- base.param
++ newParams[3] <- j*50
++ dataLog<-cbind(dataLog,sim(newParams))
++ 
++ save(dataLog, file=paste("changeLoggers", j, ".RData", sep=""))
++ }
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+change institution
+> ####################################
+> # reference threshold
+> colNames <- vector()
+> dataRT <- data.frame(1:50)
+> for(j in 1:10){
++ newParams <- base.param
++ newParams[4] <- j/10
++ dataRT<-cbind(dataRT,sim(newParams))
++ 
++ save(dataRT, file=paste("changeRT", j, ".RData", sep=""))
++ }
+> #full-factorial design setup
+> #cost=c(1,5)
+> #maxTreeGrowth = c(10,20)
+> #loggers = c(0,50, seq(100,500,100))
+> #tol = c("True", "False")
+> #refThresh = seq(0,1,0.2)
+> #enf = seq(0,100,10)
+> #full.factorial.design <- expand.grid(cost, maxTreeGrowth, loggers, tol, refThresh, enf)
+> #sim.results <- apply(full.factorial.design, 1, sim)
+> dataRT
+   X1.50 iniBM finalBM iniBM finalBM iniBM finalBM iniBM finalBM
+1      1 40242 20253.5 40289 17641.0 40376 20033.5 40246 23682.5
+2      2 40235 17690.5 40375 20978.5 40285 21185.0 40415 25907.5
+3      3 40495 20632.5 40295 18655.5 40341 21672.5 40284 26206.0
+4      4 40195 19335.5 40365 18126.0 40092 24333.5 40336 24252.5
+5      5 40394 19385.5 40055 18848.5 40115 23500.0 40287 24295.0
+6      6 40333 14881.0 40223 19995.5 40322 22521.5 40263 24493.0
+7      7 40706 24123.5 40074 21153.5 40306 24811.5 40641 24027.5
+8      8 40041 18164.0 40296 22883.5 40066 24407.0 40349 23968.0
+9      9 40439 20312.0 40273 17362.5 40132 20804.5 40445 27442.0
+10    10 40336 16261.5 40373 19115.0 40307 19565.5 40400 23873.0
+11    11 40304 18131.0 40308 18830.0 40248 22426.0 40210 23238.5
+12    12 40454 17865.5 40415 20426.0 40290 21117.0 40426 24719.5
+13    13 40234 19655.0 40190 20904.5 40438 22858.5 40332 25494.0
+14    14 40250 14760.0 40305 18463.0 40018 17900.0 40101 27403.5
+15    15 40429 15734.5 40386 22814.0 40498 22618.0 40315 23490.0
+16    16 40119 17738.0 40336 20723.5 39944 22396.5 40347 26334.0
+17    17 40309 16838.5 40585 17056.0 40429 21868.0 40609 22305.0
+18    18 40299 24625.5 40185 22705.0 40227 20036.5 40535 25709.0
+19    19 40567 16636.0 40605 24900.5 40352 20375.0 40377 25372.0
+20    20 40200 20202.5 40401 18996.0 40225 22811.5 40365 26291.0
+21    21 40483 19021.0 40142 19389.0 40483 22687.0 40240 26412.0
+22    22 40127 18352.5 40331 18134.5 40104 19730.5 40442 27034.0
+23    23 40296 15944.0 40398 18337.0 40363 22918.0 40253 22645.0
+24    24 40308 24862.0 40073 18307.0 40324 19110.5 40298 25793.0
+25    25 40171 16216.5 40137 18791.0 40455 22271.5 40373 21830.0
+26    26 40356 14147.5 40323 17250.0 40455 17968.5 40339 24012.5
+27    27 40361 23912.0 40200 15908.5 40290 23360.5 40513 25203.5
+28    28 40393 21426.5 40292 22594.0 40469 21320.0 40242 25665.5
+29    29 40434 21286.5 40548 19028.0 40496 21937.5 40466 25155.5
+30    30 40230 16278.5 40247 19713.5 40181 20664.5 40308 24095.5
+31    31 40312 18432.0 40395 18017.0 40404 21287.5 40525 26307.5
+32    32 40176 17772.5 40151 18153.0 40388 21378.5 40246 23151.0
+33    33 40416 20337.5 40039 19803.0 40239 21920.0 40497 27091.5
+34    34 40257 16417.0 40239 16819.0 40461 24818.5 40227 24724.0
+35    35 40072 20949.5 40172 16914.5 40398 20027.0 40380 22183.5
+36    36 40309 16034.0 40515 20715.5 40186 22065.5 40421 26991.5
+37    37 40424 21878.5 40127 19373.5 39963 18292.0 40325 23914.5
+38    38 40663 14511.0 40498 18128.0 40252 21709.5 40166 26366.5
+39    39 40064 18805.5 40369 17949.0 40237 20348.5 40517 24677.0
+40    40 40260 18467.0 40182 18800.0 40260 22370.0 40385 25951.5
+41    41 40381 20584.0 40162 17824.5 40365 20413.0 40361 27006.0
+42    42 40192 15541.5 40329 23532.5 40197 22298.5 40176 23712.5
+43    43 40272 25716.5 40327 19450.0 40365 22102.0 40520 22462.5
+44    44 40241 16720.0 40587 21568.0 40381 23549.5 40309 25680.0
+45    45 40129 16876.5 40272 16221.5 40398 21687.0 40315 22568.5
+46    46 40344 18791.0 40064 18139.5 40303 22361.5 40429 22533.5
+47    47 40456 17790.0 40215 15821.0 40375 23349.5 40445 28989.5
+48    48 40184 17971.0 40316 21903.5 40377 25044.5 40590 22404.0
+49    49 40221 19040.0 40354 18052.5 40449 23603.5 40486 24725.0
+50    50 40345 16375.0 40227 15968.5 40375 23525.5 40304 25746.5
+   iniBM finalBM iniBM finalBM iniBM finalBM iniBM finalBM iniBM
+1  40301 25986.0 40372 32161.5 40382 34526.5 40433 40618.0 40421
+2  40452 29382.5 40355 30437.0 40399 33214.0 40243 40687.0 40268
+3  40472 29339.0 40251 33937.0 40042 36771.0 40440 40713.0 40383
+4  40223 24687.0 40333 32376.5 40658 38432.0 40374 42239.5 40086
+5  40437 27592.5 40321 33960.0 40494 38839.5 40195 43678.0 40390
+6  40501 25858.5 40279 32071.0 40252 35963.0 40071 41688.5 40574
+7  40374 29326.0 40301 30611.0 40429 37864.5 40176 38306.0 40151
+8  40664 32006.5 40149 31547.5 40658 37609.0 40393 37485.5 40423
+9  40162 31593.5 40443 31553.5 40013 34289.5 40242 40329.0 40098
+10 40126 29929.0 40422 30801.0 40435 37204.5 40247 45332.0 40488
+11 40132 28190.0 40242 35179.0 40423 38224.0 40325 40492.5 40422
+12 40365 30643.0 40051 32043.5 40404 35528.5 40452 40972.0 40452
+13 40239 28734.5 40663 34104.0 40318 36944.0 40515 40251.0 40247
+14 40227 28051.0 40702 32162.5 40372 36296.5 40314 38055.5 40311
+15 40310 30577.5 40365 31927.0 40325 36747.0 40437 40701.5 40538
+16 40222 29742.5 40219 30058.5 40234 34224.0 40329 42264.5 40324
+17 40225 26007.0 40412 34909.5 40751 36867.0 40200 41292.0 40363
+18 40599 26880.5 40280 32787.5 40234 37445.0 40326 40039.5 40289
+19 40267 28932.5 40346 31498.5 40298 36612.5 40551 39460.5 40347
+20 40433 28196.5 40476 34515.0 40333 34648.0 40282 39447.0 40257
+21 40369 26014.0 40174 28696.5 40354 35425.5 40592 41896.0 40087
+22 40261 27531.0 39939 36433.0 40252 35463.0 40516 40523.0 40291
+23 40171 27074.5 40436 32213.0 40221 35266.0 40430 40919.5 40493
+24 40439 30791.0 40003 31544.0 40435 37219.5 40323 38610.0 40020
+25 40343 28371.5 40479 33722.5 40394 36426.5 40319 41224.5 40455
+26 39985 32183.0 40442 30733.0 40478 42125.5 40557 38789.5 40134
+27 40355 30276.5 40415 34275.5 40333 34870.0 40188 40691.5 40257
+28 40183 27112.0 40324 33892.5 40107 36248.0 40545 39982.5 40099
+29 40449 31182.5 40186 32455.0 40468 40114.0 40438 41049.0 40402
+30 40062 30879.0 40348 29895.5 40309 36506.0 40442 38998.5 40173
+31 40281 27024.5 40303 35333.0 40292 36731.0 40363 38758.0 40434
+32 40464 30820.5 40237 32265.5 40338 38902.0 40490 40195.5 40441
+33 40364 28741.0 40373 33412.0 40193 36964.5 40302 38751.0 40180
+34 40537 26866.5 40272 32988.0 40540 35144.5 40125 43042.0 40162
+35 40500 28828.5 40348 34484.0 40662 36012.5 40537 38665.0 40260
+36 40405 29249.5 40535 34224.0 40414 38056.5 40462 41672.0 40432
+37 40108 29121.5 40458 34531.0 40105 35481.5 40270 41853.0 40348
+38 40618 29047.0 40031 35408.0 40268 37872.0 40369 41092.5 40189
+39 40259 31356.5 40208 30593.0 40613 37755.5 40122 37874.5 40445
+40 40407 29810.5 40396 36102.5 40371 36407.5 40447 37436.5 40236
+41 40475 29063.0 40034 32385.0 40272 34686.0 40243 40823.0 39881
+42 40430 29447.5 40230 30636.5 40393 38135.5 40596 39658.0 40417
+43 40330 28622.0 40326 36454.0 40090 33797.0 40482 38006.0 40094
+44 40504 29403.0 40247 35386.5 40274 34959.5 40183 41888.5 40262
+45 40150 25691.0 40416 31611.5 40228 35393.5 40322 40968.0 40421
+46 40261 29919.0 40295 33648.5 39977 39473.5 40163 39766.5 40473
+47 40173 29841.5 40538 34499.5 40264 34613.0 40080 40278.0 40192
+48 40492 30387.0 40517 28812.5 40411 32790.5 40562 39967.0 40555
+49 40272 30943.5 40287 30354.5 40416 34675.5 40216 41072.0 40057
+50 40525 28866.0 40259 30044.0 40542 39489.0 40219 38501.5 40423
+   finalBM iniBM finalBM
+1  49110.5 40363 45108.5
+2  40105.0 40448 42857.0
+3  42023.5 40334 46198.0
+4  44236.5 40558 46585.5
+5  42525.5 40335 45164.0
+6  46877.0 40421 46579.0
+7  42855.0 40127 44034.0
+8  45344.0 40451 46945.0
+9  42413.0 40417 45146.5
+10 43508.5 40314 45084.5
+11 42439.0 40191 45480.5
+12 42465.0 40135 47397.5
+13 44462.0 40481 47651.5
+14 45261.0 40274 44389.0
+15 44501.0 40590 45566.0
+16 42389.0 40220 46616.5
+17 45056.5 40268 49676.5
+18 41061.5 40329 45178.0
+19 44854.5 40277 48288.0
+20 42570.0 40318 44460.5
+21 39169.5 40590 45828.0
+22 41461.5 40562 49660.5
+23 44545.0 40273 45152.5
+24 43176.5 40218 45249.5
+25 43006.0 40391 48846.0
+26 41337.5 40417 45252.0
+27 40563.5 40464 45562.5
+28 46009.0 40551 45204.0
+29 45172.5 40385 43340.5
+30 44692.5 40305 46945.5
+31 44184.0 40166 46256.5
+32 41357.5 40468 47682.0
+33 44103.0 40168 49043.0
+34 41981.5 40171 45401.0
+35 42515.5 40205 46740.5
+36 46271.5 40555 45156.5
+37 41305.5 40497 45766.5
+38 43135.0 40333 46732.0
+39 43093.0 40242 45132.5
+40 44971.5 40176 50090.0
+41 45985.0 40184 44766.0
+42 44380.5 40396 44893.0
+43 42378.0 40118 50547.0
+44 45128.0 40441 46365.5
+45 43939.0 40283 46620.5
+46 43174.5 40387 49338.0
+47 42156.5 40243 44308.0
+48 43909.0 40293 45234.0
+49 44028.0 40210 46034.0
+50 43634.5 40068 44825.5
+> save(dataCost, dataMTG, dataLog, dataRT, file="noEnfModel.RData")
+> dataCostNoEnf<-dataCost
+> dataMTGNoEnf<-dataMTG
+> dataLogNoEnf<-dataLog
+> dataRTNoEnf<-dataRT
+> save(dataCostNoEnf, dataMTGNoEnf, dataLogNoEnf, dataRTNoEnf, file="noEnfModel.RData")
+> library(RNetLogo)
+> library(tictoc)
+> setParam <- function(paramName, paramValue){
++ NLCommand(paste("set", paramName, paramValue, sep=" "))
++ }
+> # 1. Define a function that runs the simulation model
+> # for a given parameter combination and returns the
+> # value(s) of the fitting criteria.
+> sim <- function(params) {
++ # params is vector with: cost, max-tree-growth, initial-loggers
++ #    reference-threshold, enfocement-level
++ #  in that order!
++ # for now high-tolerance = "True"
++ 
++ # open NetLogo
++ nl.path <- "/Applications/NetLogo\ 6.0.4/Java"
++ NLStart(nl.path, gui=FALSE, nl.jarname =  "netlogo-6.0.4.jar")
++ # open Endogenous Enforcement model
++ model.path <-"/Applications/NetLogo\ 6.0.4/models/ISmodels/Vallino_NL6/code/Enforcement\ Endogenous\ Inst.nlogo"
++ NLLoadModel(model.path)
++ ticks <- 2000
++ runs <- 50
++ 
++ 
++ #set paramters
++ paramNames <- c("cost", "max-tree-growth", "initial-loggers", "reference-threshold", "enforcement-level")
++ for(i in 1:length(params)){
++ setParam(paramNames[i], params[i])
++ }
++ setParam("high-tolerance", "True") # for now always high tolerance
++ 
++ output <- data.frame()
++ for(i in 1:runs){
++ # run simulation
++ NLCommand("setup")
++ output[i,"iniBM"]<- NLReport("sum [trees] of patches")
++ NLDoCommand(ticks, "go")
++ output[i,"finalBM"] <- NLReport("sum [trees] of patches")
++ output[i,"finalPayoff"] <- NLReport("mean [payoff] of turtles")
++ }
++ return(output)
++ }
+> base.param <- c(5,20,100, 0.5, 0)
+> ###############################
+> #change cost
+> colNames <- vector()
+> dataCost_cheat <- data.frame(1:50)
+> for(j in 1:10){
++ newParams <- base.param
++ newParams[1] <- j*2
++ dataCost_cheat<-cbind(dataCost_cheat,sim(newParams))
++ 
++ save(dataCost_cheat, file=paste("changeCost_cheat", j, ".RData", sep=""))
++ }
+
+> d
+> library(RNetLogo)
+> library(tictoc)
+> setParam <- function(paramName, paramValue){
++ NLCommand(paste("set", paramName, paramValue, sep=" "))
++ }
+> # 1. Define a function that runs the simulation model
+> # for a given parameter combination and returns the
+> # value(s) of the fitting criteria.
+> sim <- function(params) {
++ # params is vector with: cost, max-tree-growth, initial-loggers
++ #    reference-threshold
++ #  in that order!
++ # for now high-tolerance = "True"
++ 
++ # open NetLogo
++ nl.path <- "/Applications/NetLogo\ 6.0.4/Java"
++ NLStart(nl.path, gui=FALSE, nl.jarname =  "netlogo-6.0.4.jar")
++ # open Endogenous Enforcement model
++ model.path <-"/Applications/NetLogo\ 6.0.4/models/ISmodels/Vallino_NL6/code/Endogenous\ Institution.nlogo"
++ NLLoadModel(model.path)
++ ticks <- 2000
++ runs <- 50
++ 
++ 
++ #set paramters
++ paramNames <- c("cost", "max-tree-growth", "initial-loggers", "reference-threshold")
++ for(i in 1:length(params)){
++ setParam(paramNames[i], params[i])
++ }
++ setParam("high-tolerance", "True") # for now always high tolerance
++ 
++ output <- data.frame()
++ for(i in 1:runs){
++ # run simulation
++ NLCommand("setup")
++ output[i,"iniBM"]<- NLReport("sum [trees] of patches")
++ NLDoCommand(ticks, "go")
++ output[i,"finalBM"] <- NLReport("sum [trees] of patches")
++ output[i,"finalPayoff"] <- NLReport("mean [payoff] of turtles")
++ }
++ return(output)
++ }
+> base.param <- c(5,20,100, 0.5)
+> ###############################
+> #change cost
+> colNames <- vector()
+> dataCostNoEnf <- data.frame(1:50)
+> for(j in 1:10){
++ newParams <- base.param
++ newParams[1] <- j*2
++ dataCostNoEnf<-cbind(dataCostNoEnf,sim(newParams))
++ 
++ save(dataCostNoEnf, file=paste("changeCostNoEnf", j, ".RData", sep=""))
++ }
+> ###############################
+> #change max-tree-growth
+> colNames <- vector()
+> dataMTGNoEnf <- data.frame(1:50)
+> for(j in 1:6){
++ newParams <- base.param
++ newParams[2] <- j*5
++ dataMTGNoEnf<-cbind(dataMTGNoEnf,sim(newParams))
++ 
++ save(dataMTGNoEnf, file=paste("changeMTGNoEnf", j, ".RData", sep=""))
++ }
+> ###############################
+> #change loggers
+> colNames <- vector()
+> dataLogNoEnf <- data.frame(1:50)
+> for(j in 1:6){
++ newParams <- base.param
++ newParams[3] <- j*50
++ dataLogNoEnf<-cbind(dataLogNoEnf,sim(newParams))
++ 
++ save(dataLogNoEnf, file=paste("changeLoggersNoEnf", j, ".RData", sep=""))
++ }
+> ####################################
+> # reference threshold
+> colNames <- vector()
+> dataRTNoEnf <- data.frame(1:50)
+> for(j in 1:10){
++ newParams <- base.param
++ newParams[4] <- j/10
++ dataRTNoEnf<-cbind(dataRTNoEnf,sim(newParams))
++ 
++ save(dataRTNoEnf, file=paste("changeRTNoEnf", j, ".RData", sep=""))
++ }
+> save(dataCostNoEnf, dataMTGNoEnf, dataLogNoEnf, dataRTNoEnf, file="noEnfParams.RData")
+> #full-factorial design setup
+> #cost=c(1,5)
+> #maxTreeGrowth = c(10,20)
+> #loggers = c(0,50, seq(100,500,100))
+> #tol = c("True", "False")
+> #refThresh = seq(0,1,0.2)
+> #enf = seq(0,100,10)
+> #full.factorial.design <- expand.grid(cost, maxTreeGrowth, loggers, tol, refThresh, enf)
+> #sim.results <- apply(full.factorial.design, 1, sim)
+null

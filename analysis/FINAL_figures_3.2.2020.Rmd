@@ -7,7 +7,6 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-setwd("~/Documents/WoosterStuff/fall2019/IS_organized/analysis")
 library(tidyverse)
 library(ggthemes)
 library(gridExtra)
@@ -68,7 +67,7 @@ line_size = 1.2
 
 ## pred prey ABM example 
 ```{r}
-sheep50wolves100<- read.csv(file="./allData_IS/sheep50wolves100.csv", stringsAsFactors = FALSE)
+sheep50wolves100<- read.csv(file="./IS_analysis/additional_data/sheep50wolves100.csv", stringsAsFactors = FALSE)
 sheep50wolves100<-as.data.frame(sheep50wolves100)[1:500,]
 sheep50wolves100$time<- 1:500
 for(i in 1:20){
@@ -87,7 +86,7 @@ v1<-sheep50wolves100%>%filter(time<376)%>%ggplot(aes(x=time, y=numberTurtles))+
   theme(legend.position = "none")
 
 #####
-sheep50wolves200<- read.csv(file="./allData_IS/sheep50wolves200.csv", stringsAsFactors = FALSE)
+sheep50wolves200<- read.csv(file="./IS_analysis/additional_data/sheep50wolves200.csv", stringsAsFactors = FALSE)
 sheep50wolves200<-as.data.frame(sheep50wolves200)[1:200,]
 sheep50wolves200$time<- 1:200
 for(i in 1:20){
@@ -106,7 +105,7 @@ v2<-sheep50wolves200%>%ggplot()+
   theme(legend.position = "none")
 
 ############
-sheepWolves_deq <-read.csv(file="./allData_IS/wolvesSheep_difEQdata.csv", stringsAsFactors = FALSE)
+sheepWolves_deq <-read.csv(file="./IS_analysis/additional_data/wolvesSheep_difEQdata.csv", stringsAsFactors = FALSE)
 sheepWolves_deq<- sheepWolves_deq[(1:550)*500,] #280,000
 sheepWolves_deq<- sheepWolves_deq%>%gather(key="run", value="population", -time )%>%mutate(population=as.numeric(population))
 sheepWolves_deq<- sheepWolves_deq%>%separate(run, into = c("agent", "run"))
@@ -148,13 +147,13 @@ viz_deq=annotate_figure(viz_deq,
                 left = text_grob(expression(bold("Population size")), size = axlab_size, rot = 90)
 )
 
-ggsave("./figs/viz_deq.pdf", viz_deq, width=5.75, height=4, units="in")
+ggsave("./IS_analysis/figs/viz_deq.pdf", viz_deq, width=5.75, height=4, units="in")
 
 ```
 
 ## bravo model run 
 ```{r}
-bravo_data<- read.csv("./allData_IS/bravo_modelRun.csv", stringsAsFactors = FALSE)[1:200,]%>%mutate(TotalBM=TotalBM/TotalBM[1])
+bravo_data<- read.csv("./IS_analysis/additional_data/bravo_modelRun.csv", stringsAsFactors = FALSE)[1:200,]%>%mutate(TotalBM=TotalBM/TotalBM[1])
 
 ax_k = expression(paste(bolditalic("current-institution")))
 v1b<-bravo_data%>%ggplot(aes(x=period))+
@@ -193,7 +192,7 @@ viz_bravo=annotate_figure(viz_bravo,
                 bottom = text_grob(expression(bold(Period)), vjust = 0,  size = axlab_size),
 )
 
-ggsave("./figs/viz_bravo.pdf", viz_bravo, width=5.75, height=4, units="in")
+ggsave("./IS_analysis/figs/viz_bravo.pdf", viz_bravo, width=5.75, height=4, units="in")
 
 ```
 
@@ -223,7 +222,7 @@ viz_baseVallino=annotate_figure(viz_baseVallino,
                 top = text_grob("26.3%", vjust = 1,  hjust=1.5, size = 10),
 )
 
-ggsave("./figs/viz_baseVallino.pdf", viz_baseVallino, width=4, height=2.5, units="in")
+ggsave("./IS_analysis/figs/viz_baseVallino.pdf", viz_baseVallino, width=4, height=2.5, units="in")
 ```
 
 reference-threshold boxplot 
@@ -237,7 +236,7 @@ viz_vallinoRTboxplot=rtData_vallino%>%ggplot(aes(x=as.factor(as.numeric(variable
 viz_vallinoRTboxplot
 
 
-ggsave("./figs/viz_vallinoRTboxplot.pdf", viz_vallinoRTboxplot, width=4, height=2.5, units="in")
+ggsave("./IS_analysis/figs/viz_vallinoRTboxplot.pdf", viz_vallinoRTboxplot, width=4, height=2.5, units="in")
 
 ```
 
@@ -251,7 +250,7 @@ viz_vallinoEnf=enfGraph%>%ggplot(aes(x=rev(enfValue), y=TotalBM*100))+geom_boxpl
   setGraphs
 
 
-ggsave("./figs/viz_vallinoEnf.pdf", viz_vallinoEnf, width=4, height=2.5, units="in")
+ggsave("./IS_analysis/figs/viz_vallinoEnf.pdf", viz_vallinoEnf, width=4, height=2.5, units="in")
 
 ```
 
@@ -271,13 +270,13 @@ viz_vallinoKf=allData1_vallino%>%ggplot(aes(K, TotalBM*100, color=categories))+
 
 viz_vallinoKf
 
-ggsave("./figs/viz_vallinoKf.pdf", viz_vallinoKf, width=5.75, height=3, units="in")
+ggsave("./IS_analysis/figs/viz_vallinoKf.pdf", viz_vallinoKf, width=5.75, height=3, units="in")
 
 ```
 
 
 Fit model to LV equations - not using this 
-```{r}
+```{r, eval = FALSE}
 source(file="setupLVequations.R")
 
 testData = read.csv("./allData_IS/log1000.csv")
@@ -331,7 +330,7 @@ viz_abmCompareLV=compare_model_to_LV%>%ggplot(aes(x=time))+
 
 viz_abm_lv=grid.arrange(arrangeGrob(viz_abmFitLV, lv_legend, ncol=2), viz_abmCompareLV)
 
-ggsave("./figs/viz_abm_lv.pdf", viz_abm_lv, width = 5.75, height = 5, units="in")
+ggsave("./IS_analysis/figs/viz_abm_lv.pdf", viz_abm_lv, width = 5.75, height = 5, units="in")
 grid.arrange(viz_abmFitLV, viz_abmCompareLV)
 
 ```
@@ -402,7 +401,7 @@ viz_abm_lv=annotate_figure(viz_abm_lv,
 )
 
 
-ggsave("./figs/viz_abm_lv.pdf", viz_abm_lv, width = 5.75, height = 2.7, units="in")
+ggsave("./IS_analysis/figs/viz_abm_lv.pdf", viz_abm_lv, width = 5.75, height = 2.7, units="in")
 ```
 
 
@@ -412,7 +411,7 @@ ggsave("./figs/viz_abm_lv.pdf", viz_abm_lv, width = 5.75, height = 2.7, units="i
 using this - distirbution of cheaters
 
 ```{r}
-load("./allData_IS/cheatProb_distribution.RData")
+load("./IS_analysis/additional_data/cheatProb_distribution.RData")
 
 makeLegend<-cheatProb_distribution%>%filter(variable=="mon.1"|variable=="Sanc.5"|variable=="mon.9")%>%ggplot()+
   geom_histogram(aes(x=cheaters, fill=variable), position="identity", binwidth = 0.05, alpha=0.5)+
@@ -464,7 +463,7 @@ viz_monSanc=annotate_figure(viz_monSanc,
 
 viz_monSanc
 
-ggsave("./figs/viz_monSanc.pdf", viz_monSanc, width=5.75, height=3.5, units="in")
+ggsave("./IS_analysis/figs/viz_monSanc.pdf", viz_monSanc, width=5.75, height=3.5, units="in")
 
 cheatProb_distribution%>%filter(variable=="Sanc.9")%>%group_by(cheaters<0.01)%>%summarize(n())
 cheatProb_distribution%>%filter(variable=="mon.9")%>%group_by(cheaters<0.01)%>%summarize(n())
@@ -492,7 +491,7 @@ viz_baseMymod=annotate_figure(viz_baseMymod,
 )
 
 
-ggsave("./figs/viz_baseMymod.pdf", viz_baseMymod, width=4, height=2.5, units="in")
+ggsave("./IS_analysis/figs/viz_baseMymod.pdf", viz_baseMymod, width=4, height=2.5, units="in")
 
 mean(baseData$TotalBM)
 findTrough(baseData$TotalBM, 0.05, 0.15)
@@ -541,8 +540,8 @@ kBM_allData_plot<-allData_plotK_BM%>%ggplot(aes(K, TotalBM*100, color=logger60))
 
 #grid.arrange(kBM_allData_plot2, kBM_allData_plot)
 
-ggsave("./figs/viz_kBM_base.pdf", kBM_base_plot, width=4.5, height=2.5, units="in")
-ggsave("./figs/viz_kBM_allData.pdf", kBM_allData_plot, width=5, height=2.5, units="in")
+ggsave("./IS_analysis/figs/viz_kBM_base.pdf", kBM_base_plot, width=4.5, height=2.5, units="in")
+ggsave("./IS_analysis/figs/viz_kBM_allData.pdf", kBM_allData_plot, width=5, height=2.5, units="in")
 
 cor(allData$TotalBM, allData$K)
 cor(baseData$TotalBM, baseData$K)
@@ -654,7 +653,7 @@ rt_boxplot<-rtData2%>%ggplot(aes(x=as.factor(as.numeric(variableValue)/10), y=To
   labs(y=axlab_bm, x=expression(bolditalic("reference-threshold")))
 rt_boxplot
 
-ggsave("./figs/viz_rtBoxplot.pdf", rt_boxplot, width=4, height=2.5, units="in")
+ggsave("./IS_analysis/figs/viz_rtBoxplot.pdf", rt_boxplot, width=4, height=2.5, units="in")
 ```
 
 calculating jumps
@@ -690,7 +689,7 @@ viz_rt_jump=rtJumpData%>%ggplot(aes(as.factor(as.numeric(variableValue)/10), K))
 viz_rt_jump
 
 
-ggsave("./figs/viz_rtJump.pdf", viz_rt_jump, width=5.75, height=3, units="in")
+ggsave("./IS_analysis/figs/viz_rtJump.pdf", viz_rt_jump, width=5.75, height=3, units="in")
 
 cor(allData$K, allData$numCheaters)
 
@@ -708,7 +707,7 @@ viz_cheatK_cor=allData%>%ggplot(aes(x=numCheaters, y = K, color))+
 viz_cheatK_cor
 
 
-ggsave("./figs/viz_cheatK_cor.pdf", viz_cheatK_cor, width=4, height=2.5, units="in")
+ggsave("./IS_analysis/figs/viz_cheatK_cor.pdf", viz_cheatK_cor, width=4, height=2.5, units="in")
 
 ```
 Jumps for allData - not using 
@@ -829,7 +828,7 @@ both_jumpAll%>%group_by(prop)%>%summarize(n())
 viz_jumpsAll=grid.arrange(arrangeGrob(arrangeGrob(arrangeGrob(v2+ggtitle("a)"),v3+ggtitle("b)"), ncol=1, nrow=2)), v4+ggtitle("c)"), ncol=2, widths=c(3,2)))
 
 
-ggsave("./figs/viz_jumpsAll.pdf", viz_jumpsAll, width = 5, height = 5, units = "in")
+ggsave("./IS_analysis/figs/viz_jumpsAll.pdf", viz_jumpsAll, width = 5, height = 5, units = "in")
 
 ```
 
@@ -863,7 +862,7 @@ monCheaters_graph<-monitoringData%>%ggplot(aes(x=variableValue, y=numCheaters))+
 
 viz_monSanc=grid.arrange(sancBM_graph+ggtitle("a)"), monBM_graph+ggtitle("b)"), sancCheaters_graph+ggtitle("c)"), monCheaters_graph+ggtitle("d)"), nrow=2)
 
-ggsave("./figs/viz_monSanc_boxplots.pdf", viz_monSanc, width = 5.75, height = 4.4, units = "in")
+ggsave("./IS_analysis/figs/viz_monSanc_boxplots.pdf", viz_monSanc, width = 5.75, height = 4.4, units = "in")
 
 ```
 

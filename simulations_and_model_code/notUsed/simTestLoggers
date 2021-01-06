@@ -1,0 +1,116 @@
+library(RNetLogo)
+library(tictoc)
+
+setwd("/Applications/NetLogo 6.0.4/models/ISmodels/Vallino_NL6/code")
+
+ticks<-7000
+
+setParam <- function(paramName, paramValue){
+	NLCommand(paste("set", paramName, paramValue, sep=" "))	
+}
+
+getGraphs <- function(fileName){
+	
+plotFile<-read.csv(file = fileName, header=FALSE, stringsAsFactors=FALSE)[,1:2]
+
+i<-1
+j<-1
+out<-data.frame(1:(ticks/10))
+while(i<dim(plotFile)[1]){
+	if(plotFile[i,2]=="y"){
+		out[,plotFile[i-8,1]]<-plotFile[(i+1):(i+(ticks/10)),2]
+		j<- j+1
+		i<- i+(ticks/10)
+	}
+	i<-i+1
+}
+
+colNames <- c("K", "unsatisfied", "Payoffs", "TotalBM", "GreenPatches", "beta.i", "k.i", "numLoggers") 
+out<-out[,-1]
+colnames(out)<- colNames
+
+for(i in 1:length(colNames)){
+	out[,i] <-as.numeric(out[,i])
+}
+
+return(out)
+
+}
+
+
+
+# 1. Define a function that runs the simulation model
+# for a given parameter combination and returns the
+# value(s) of the fitting criteria. 
+simExportPlots <- function(params) {
+	# params is vector with: cost, max-tree-growth, initial-loggers
+	#    reference-threshold, enfocement-level
+	#  in that order! 
+	# for now high-tolerance = "True" 
+	
+	# open NetLogo
+	nl.path <- "/Applications/NetLogo\ 6.0.4/Java"
+	NLStart(nl.path, gui=FALSE, nl.jarname =  "netlogo-6.0.4.jar")
+	# open Endogenous Enforcement model
+	model.path <-"/Applications/NetLogo\ 6.0.4/models/ISmodels/Vallino_NL6/code/Enforcement\ Endogenous\ Inst.nlogo"
+	NLLoadModel(model.path)
+	#ticks <- 2000
+	runs <- 50
+	
+	
+	#set paramters
+	paramNames <- c("cost", "max-tree-growth", "initial-loggers", "reference-threshold", "enforcement-level")
+           for(i in 1:length(params)){
+				setParam(paramNames[i], params[i]) 
+			}
+			setParam("high-tolerance", "True") # for now always high tolerance 
+
+output <-list()
+
+for(i in 1:runs){
+# run simulation 
+	NLCommand("setup")
+	NLDoCommand(ticks, "go")
+
+	
+	NLCommand("export-all-plots \"exportPlots.csv\"") 
+	output[[i]]<-getGraphs("exportPlots.csv") 
+
+}
+
+    return(output)
+}
+
+
+
+base.param <- c(5,20,100, 0.5, 50)
+
+
+newParams <- c(5,20,200, 0.5, 50)
+log200<-simExportPlots(newParams)
+
+newParams <- c(5,20,300, 0.5, 50)
+log300<-simExportPlots(newParams)
+
+newParams <- c(5,20,400, 0.5, 50)
+log400<-simExportPlots(newParams)
+
+newParams <- c(5,20,500, 0.5, 50)
+log500<-simExportPlots(newParams)
+
+newParams <- c(5,20,600, 0.5, 50)
+log600<-simExportPlots(newParams)
+
+newParams <- c(5,20,700, 0.5, 50)
+log700<-simExportPlots(newParams)
+
+newParams <- c(5,20,800, 0.5, 50)
+log800<-simExportPlots(newParams)
+
+newParams <- c(5,20,900, 0.5, 50)
+log900<-simExportPlots(newParams)
+
+newParams <- c(5,20,1000, 0.5, 50)
+log1000<-simExportPlots(newParams)
+
+save(log200, log300, log400, log500, log600, log700, log800, log900, log1000, file="logBasin.RData")
