@@ -5,10 +5,10 @@ library(tictoc)
 testing <- "testing"
 setwd("/Applications/NetLogo 6.0.4/models/ISmodels/Vallino_NL6/code")
 
-ticks<-5
-runs<-2
-#ticks<- 2000
-#runs<- 50
+#ticks<-5 # for testing 
+#runs<-2
+ticks<- 2000
+runs<- 50
 
 setParam <- function(paramName, paramValue){
 	NLCommand(paste("set", paramName, paramValue, sep=" "))	
