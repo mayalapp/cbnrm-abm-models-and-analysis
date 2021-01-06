@@ -1,0 +1,776 @@
+
+R version 3.6.0 (2019-04-26) -- "Planting of a Tree"
+Copyright (C) 2019 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+Loading required package: JGR
+Loading required package: rJava
+Loading required package: JavaGD
+
+starting httpd help server ... done
+> library(RNetLogo)
+Loading required package: igraph
+
+Attaching package: ‘igraph’
+
+The following objects are masked from ‘package:stats’:
+
+    decompose, spectrum
+
+The following object is masked from ‘package:base’:
+
+    union
+
+> library(tictoc)
+> testing <- "testing"
+> setwd("/Applications/NetLogo 6.0.4/models/ISmodels/Vallino_NL6/code")
+> #ticks<-5
+> #runs<-2
+> ticks<- 2000
+> runs<- 50
+> setParam <- function(paramName, paramValue){
++ NLCommand(paste("set", paramName, paramValue, sep=" "))
++ }
+> getGraphs <- function(fileName){
++ 
++ plotFile<-read.csv(file = fileName, header=FALSE, stringsAsFactors=FALSE)[,1:2]
++ 
++ i<-1
++ j<-1
++ out<-data.frame(1:(ticks/10))
++ while(i<dim(plotFile)[1]){
++ if(plotFile[i,2]=="y"){
++ 
++ out[,plotFile[i-6,1]]<-plotFile[(i+1):(i+(ticks/10)),2]
++ j<- j+1
++ i<- i+(ticks/10)
++ }
++ i<-i+1
++ }
++ 
++ 
++ 
++ colNames <- c("K", "unsatisfied", "Payoffs", "TotalBM", "GreenPatches", "beta.i", "k.i", "numLoggers", "numCheaters")
++ out<-out[,-1]
++ 
++ colnames(out)<- colNames
++ 
++ 
++ for(i in 1:length(colNames)){
++ out[,i] <-as.numeric(out[,i])
++ }
++ 
++ return(out)
++ 
++ }
+> # 1. Define a function that runs the simulation model
+> # for a given parameter combination and returns the
+> # value(s) of the fitting criteria.
+> simExportPlots <- function(params) {
++ # params is vector with: cost, max-tree-growth, initial-loggers
++ #    reference-threshold, enfocement-level
++ #  in that order!
++ # for now high-tolerance = "True"
++ 
++ # open NetLogo
++ nl.path <- "/Applications/NetLogo\ 6.0.4/Java"
++ NLStart(nl.path, gui=FALSE, nl.jarname =  "netlogo-6.0.4.jar")
++ # open Endogenous Enforcement model
++ model.path <-"/Applications/NetLogo\ 6.0.4/models/ISmodels/Vallino_NL6/code/myModel1.nlogo"
++ NLLoadModel(model.path)
++ #ticks <- 2000
++ #runs <- 50
++ 
++ 
++ #set paramters
++ paramNames <- c("cost", "max-tree-growth", "initial-loggers", "reference-threshold", "monitoring-level", "initial-prob-cheat", "sanction-level")
++ for(i in 1:length(params)){
++ setParam(paramNames[i], params[i])
++ }
++ setParam("high-tolerance", "True") # for now always high tolerance
++ 
++ output <-list()
++ 
++ for(i in 1:runs){
++ # run simulation
++ NLCommand("setup")
++ NLDoCommand(ticks, "go")
++ 
++ 
++ NLCommand("export-all-plots \"exportPlots.csv\"")
++ output[[i]]<-getGraphs("exportPlots.csv")
++ 
++ }
++ 
++ return(output)
++ }
+> base.param <- c(5,20,100, 0.5, 50, 0.5, 0.5)
+> ###############################
+> runParams<- function(paramValues, base.param, fileName, variable){
++ dataOut <- list()
++ for(i in 1:length(paramValues)){
++ paramNames <- c("cost", "max-tree-growth", "initial-loggers", "reference-threshold", "monitoring-level", "initial-prob-cheat", "sanction-level")
++ varNum <- match(variable, paramNames)
++ newParams<-base.param
++ newParams[varNum] <- paramValues[i]
++ dataOut[[i]]<-simExportPlots(newParams)
++ 
++ save(dataOut, file=fileName)
++ }
++ 
++ return(dataOut)
++ }
+> ############################### ###############################
+> #change monitoring
+> paramVals <- (0:10)*10
+> dataMonitoring<- runParams(paramVals, base.param, "myMod_changeMonitoring.RData", "monitoring-level")
+In addition: Warning message:
+In file(file, "rt") :
+  cannot open file 'exportPlots.csv': No such file or directory
+> setwd("/Applications/NetLogo 6.0.4/models/ISmodels/Vallino_NL6/code")
+> library(RNetLogo)
+> library(tictoc)
+> testing <- "testing"
+> setwd("/Applications/NetLogo 6.0.4/models/ISmodels/Vallino_NL6/code")
+> #ticks<-5
+> #runs<-2
+> ticks<- 2000
+> runs<- 50
+> setParam <- function(paramName, paramValue){
++ NLCommand(paste("set", paramName, paramValue, sep=" "))
++ }
+> getGraphs <- function(fileName){
++ 
++ plotFile<-read.csv(file = fileName, header=FALSE, stringsAsFactors=FALSE)[,1:2]
++ 
++ i<-1
++ j<-1
++ out<-data.frame(1:(ticks/10))
++ while(i<dim(plotFile)[1]){
++ if(plotFile[i,2]=="y"){
++ 
++ out[,plotFile[i-6,1]]<-plotFile[(i+1):(i+(ticks/10)),2]
++ j<- j+1
++ i<- i+(ticks/10)
++ }
++ i<-i+1
++ }
++ 
++ 
++ 
++ colNames <- c("K", "unsatisfied", "Payoffs", "TotalBM", "GreenPatches", "beta.i", "k.i", "numLoggers", "numCheaters")
++ out<-out[,-1]
++ 
++ colnames(out)<- colNames
++ 
++ 
++ for(i in 1:length(colNames)){
++ out[,i] <-as.numeric(out[,i])
++ }
++ 
++ return(out)
++ 
++ }
+> # 1. Define a function that runs the simulation model
+> # for a given parameter combination and returns the
+> # value(s) of the fitting criteria.
+> simExportPlots <- function(params) {
++ # params is vector with: cost, max-tree-growth, initial-loggers
++ #    reference-threshold, enfocement-level
++ #  in that order!
++ # for now high-tolerance = "True"
++ 
++ # open NetLogo
++ nl.path <- "/Applications/NetLogo\ 6.0.4/Java"
++ NLStart(nl.path, gui=FALSE, nl.jarname =  "netlogo-6.0.4.jar")
++ # open Endogenous Enforcement model
++ model.path <-"/Applications/NetLogo\ 6.0.4/models/ISmodels/Vallino_NL6/code/myModel1.nlogo"
++ NLLoadModel(model.path)
++ #ticks <- 2000
++ #runs <- 50
++ 
++ 
++ #set paramters
++ paramNames <- c("cost", "max-tree-growth", "initial-loggers", "reference-threshold", "monitoring-level", "initial-prob-cheat", "sanction-level")
++ for(i in 1:length(params)){
++ setParam(paramNames[i], params[i])
++ }
++ setParam("high-tolerance", "True") # for now always high tolerance
++ 
++ output <-list()
++ 
++ for(i in 1:runs){
++ # run simulation
++ NLCommand("setup")
++ NLDoCommand(ticks, "go")
++ 
++ 
++ NLCommand("export-all-plots \"exportPlots.csv\"")
++ output[[i]]<-getGraphs("exportPlots.csv")
++ 
++ }
++ 
++ return(output)
++ }
+> base.param <- c(5,20,100, 0.5, 50, 0.5, 0.5)
+> ###############################
+> runParams<- function(paramValues, base.param, fileName, variable){
++ dataOut <- list()
++ for(i in 1:length(paramValues)){
++ paramNames <- c("cost", "max-tree-growth", "initial-loggers", "reference-threshold", "monitoring-level", "initial-prob-cheat", "sanction-level")
++ varNum <- match(variable, paramNames)
++ newParams<-base.param
++ newParams[varNum] <- paramValues[i]
++ dataOut[[i]]<-simExportPlots(newParams)
++ 
++ save(dataOut, file=fileName)
++ }
++ 
++ return(dataOut)
++ }
+> ############################### ###############################
+> #change monitoring
+> paramVals <- (0:10)*10
+> dataMonitoring<- runParams(paramVals, base.param, "myMod_changeMonitoring.RData", "monitoring-level")
+> ###############################
+> #change initial-prob-cheat
+> paramVals <- (0:10)/10
+> dataCheat<- runParams(paramVals, base.param, "myMod_changeCheat.RData", "initial-prob-cheat")
+> ###############################
+> #change sanction
+> paramVals <- (0:10)/10
+> dataSanction<- runParams(paramVals, base.param, "myMod_changeSanction.RData", "sanction-level")
+> ###############################
+> #change cost
+> paramVals <- (0:10)*2
+> dataCost<- runParams(paramVals, base.param, "myMod_changeCost.RData", "cost")
+
+> ###############################
+> #change max-tree-growth
+> paramVals <- (1:6)*5
+> dataMTG<- runParams(paramVals, base.param, "myMod_changeMTG.RData", "max-tree-growth")
+
+> ####################################
+> # reference threshold
+> paramVals <- (1:10)/10
+> dataRT<- runParams(paramVals, base.param, "myMod_changeRT.RData", "reference-threshold")
+
+> ###############################
+> #change loggers
+> paramVals <- seq(60, 200, by=20)
+> dataLog<- runParams(paramVals, base.param, "myMod_changeLog.RData", "initial-loggers")
+
+> library(RNetLogo)
+> library(tictoc)
+> testing <- "testing"
+> setwd("/Applications/NetLogo 6.0.4/models/ISmodels/Vallino_NL6/code")
+> #ticks<-5
+> #runs<-2
+> ticks<- 2000
+> runs<- 50
+> setParam <- function(paramName, paramValue){
++ NLCommand(paste("set", paramName, paramValue, sep=" "))
++ }
+> getGraphs <- function(fileName){
++ 
++ plotFile<-read.csv(file = fileName, header=FALSE, stringsAsFactors=FALSE)[,1:2]
++ 
++ i<-1
++ j<-1
++ out<-data.frame(1:(ticks/10))
++ while(i<dim(plotFile)[1]){
++ if(plotFile[i,2]=="y"){
++ 
++ out[,plotFile[i-6,1]]<-plotFile[(i+1):(i+(ticks/10)),2]
++ j<- j+1
++ i<- i+(ticks/10)
++ }
++ i<-i+1
++ }
++ 
++ 
++ 
++ colNames <- c("K", "unsatisfied", "Payoffs", "TotalBM", "GreenPatches", "beta.i", "k.i", "numLoggers", "numCheaters")
++ out<-out[,-1]
++ 
++ colnames(out)<- colNames
++ 
++ 
++ for(i in 1:length(colNames)){
++ out[,i] <-as.numeric(out[,i])
++ }
++ 
++ return(out)
++ 
++ }
+> # 1. Define a function that runs the simulation model
+> # for a given parameter combination and returns the
+> # value(s) of the fitting criteria.
+> simExportPlots <- function(params) {
++ # params is vector with: cost, max-tree-growth, initial-loggers
++ #    reference-threshold, enfocement-level
++ #  in that order!
++ # for now high-tolerance = "True"
++ 
++ # open NetLogo
++ nl.path <- "/Applications/NetLogo\ 6.0.4/Java"
++ NLStart(nl.path, gui=FALSE, nl.jarname =  "netlogo-6.0.4.jar")
++ # open Endogenous Enforcement model
++ model.path <-"/Applications/NetLogo\ 6.0.4/models/ISmodels/Vallino_NL6/code/myModel1.nlogo"
++ NLLoadModel(model.path)
++ #ticks <- 2000
++ #runs <- 50
++ 
++ 
++ #set paramters
++ paramNames <- c("cost", "max-tree-growth", "initial-loggers", "reference-threshold", "monitoring-level", "initial-prob-cheat", "sanction-level")
++ for(i in 1:length(params)){
++ setParam(paramNames[i], params[i])
++ }
++ setParam("high-tolerance", "True") # for now always high tolerance
++ 
++ output <-list()
++ 
++ for(i in 1:runs){
++ # run simulation
++ NLCommand("setup")
++ NLDoCommand(ticks, "go")
++ 
++ 
++ NLCommand("export-all-plots \"exportPlots.csv\"")
++ output[[i]]<-getGraphs("exportPlots.csv")
++ 
++ }
++ 
++ return(output)
++ }
+> base.param <- c(5,20,100, 0.5, 50, 0.5, 0.5)
+> ###############################
+> runParams<- function(paramValues, base.param, fileName, variable){
++ dataOut <- list()
++ for(i in 1:length(paramValues)){
++ paramNames <- c("cost", "max-tree-growth", "initial-loggers", "reference-threshold", "monitoring-level", "initial-prob-cheat", "sanction-level")
++ varNum <- match(variable, paramNames)
++ newParams<-base.param
++ newParams[varNum] <- paramValues[i]
++ dataOut[[i]]<-simExportPlots(newParams)
++ 
++ save(dataOut, file=fileName)
++ }
++ 
++ return(dataOut)
++ }
+> ############################### ###############################
+> #change monitoring
+> paramVals <- (0:10)*10
+> dataMonitoring<- runParams(paramVals, base.param, "myMod_changeMonitoring_setUnsat.RData", "monitoring-level")
+[1] "Java-Object{Nothing named IFPAYOFF-SATISFACTION has been defined. at position 5445 in }"
+> ###############################
+> #change initial-prob-cheat
+> paramVals <- (0:10)/10
+> dataCheat<- runParams(paramVals, base.param, "myMod_changeCheat_setUnsat.RData", "initial-prob-cheat")
+[1] "Java-Object{Nothing named IFPAYOFF-SATISFACTION has been defined. at position 5445 in }"
+> ###############################
+> #change sanction
+> paramVals <- (0:10)/10
+> dataSanction<- runParams(paramVals, base.param, "myMod_changeSanction_setUnsat.RData", "sanction-level")
+[1] "Java-Object{Nothing named IFPAYOFF-SATISFACTION has been defined. at position 5445 in }"
+> ###############################
+> #change cost
+> paramVals <- (0:10)*2
+> dataCost<- runParams(paramVals, base.param, "myMod_changeCost_setUnsat.RData", "cost")
+[1] "Java-Object{Nothing named IFPAYOFF-SATISFACTION has been defined. at position 5445 in }"
+> ###############################
+> #change max-tree-growth
+> paramVals <- (1:6)*5
+> dataMTG<- runParams(paramVals, base.param, "myMod_changeMTG_setUnsat.RData", "max-tree-growth")
+[1] "Java-Object{Nothing named IFPAYOFF-SATISFACTION has been defined. at position 5445 in }"
+> ####################################
+> # reference threshold
+> paramVals <- (1:10)/10
+> dataRT<- runParams(paramVals, base.param, "myMod_changeRT_setUnsat.RData", "reference-threshold")
+[1] "Java-Object{Nothing named IFPAYOFF-SATISFACTION has been defined. at position 5445 in }"
+> ###############################
+> #change loggers
+> paramVals <- seq(60, 200, by=20)
+> dataLog<- runParams(paramVals, base.param, "myMod_changeLog_setUnsat.RData", "initial-loggers")
+[1] "Java-Object{Nothing named IFPAYOFF-SATISFACTION has been defined. at position 5445 in }"
+> library(RNetLogo)
+> library(tictoc)
+> testing <- "testing"
+> setwd("/Applications/NetLogo 6.0.4/models/ISmodels/Vallino_NL6/code")
+> #ticks<-5
+> #runs<-2
+> ticks<- 2000
+> runs<- 20
+> setParam <- function(paramName, paramValue){
++ NLCommand(paste("set", paramName, paramValue, sep=" "))
++ }
+> getGraphs <- function(fileName){
++ 
++ plotFile<-read.csv(file = fileName, header=FALSE, stringsAsFactors=FALSE)[,1:2]
++ 
++ i<-1
++ j<-1
++ out<-data.frame(1:(ticks/10))
++ while(i<dim(plotFile)[1]){
++ if(plotFile[i,2]=="y"){
++ 
++ out[,plotFile[i-6,1]]<-plotFile[(i+1):(i+(ticks/10)),2]
++ j<- j+1
++ i<- i+(ticks/10)
++ }
++ i<-i+1
++ }
++ 
++ 
++ 
++ colNames <- c("K", "unsatisfied", "Payoffs", "TotalBM", "GreenPatches", "beta.i", "k.i", "numLoggers", "numCheaters")
++ out<-out[,-1]
++ 
++ colnames(out)<- colNames
++ 
++ 
++ for(i in 1:length(colNames)){
++ out[,i] <-as.numeric(out[,i])
++ }
++ 
++ return(out)
++ 
++ }
+> # 1. Define a function that runs the simulation model
+> # for a given parameter combination and returns the
+> # value(s) of the fitting criteria.
+> simExportPlots <- function(params) {
++ # params is vector with: cost, max-tree-growth, initial-loggers
++ #    reference-threshold, enfocement-level
++ #  in that order!
++ # for now high-tolerance = "True"
++ 
++ # open NetLogo
++ nl.path <- "/Applications/NetLogo\ 6.0.4/Java"
++ NLStart(nl.path, gui=FALSE, nl.jarname =  "netlogo-6.0.4.jar")
++ # open Endogenous Enforcement model
++ model.path <-"/Applications/NetLogo\ 6.0.4/models/ISmodels/Vallino_NL6/code/myModel1.nlogo"
++ NLLoadModel(model.path)
++ #ticks <- 2000
++ #runs <- 50
++ 
++ 
++ #set paramters
++ paramNames <- c("cost", "max-tree-growth", "initial-loggers", "reference-threshold", "monitoring-level", "initial-prob-cheat", "sanction-level")
++ for(i in 1:length(params)){
++ setParam(paramNames[i], params[i])
++ }
++ setParam("high-tolerance", "True") # for now always high tolerance
++ 
++ output <-list()
++ 
++ for(i in 1:runs){
++ # run simulation
++ NLCommand("setup")
++ NLDoCommand(ticks, "go")
++ 
++ 
++ NLCommand("export-all-plots \"exportPlots.csv\"")
++ output[[i]]<-getGraphs("exportPlots.csv")
++ 
++ }
++ 
++ return(output)
++ }
+> base.param <- c(5,20,100, 0.5, 50, 0.5, 0.5)
+> ###############################
+> runParams<- function(paramValues, base.param, fileName, variable){
++ dataOut <- list()
++ for(i in 1:length(paramValues)){
++ paramNames <- c("cost", "max-tree-growth", "initial-loggers", "reference-threshold", "monitoring-level", "initial-prob-cheat", "sanction-level")
++ varNum <- match(variable, paramNames)
++ newParams<-base.param
++ newParams[varNum] <- paramValues[i]
++ dataOut[[i]]<-simExportPlots(newParams)
++ 
++ save(dataOut, file=fileName)
++ }
++ 
++ return(dataOut)
++ }
+> ############################### ###############################
+> #change monitoring
+> paramVals <- (0:5)*20
+> dataMonitoring<- runParams(paramVals, base.param, "myMod_changeMonitoring_setUnsat.RData", "monitoring-level")
+> library(RNetLogo)
+> library(tictoc)
+> testing <- "testing"
+> setwd("/Applications/NetLogo 6.0.4/models/ISmodels/Vallino_NL6/code")
+> #ticks<-5
+> #runs<-2
+> ticks<- 2000
+> runs<- 50
+> setParam <- function(paramName, paramValue){
++ NLCommand(paste("set", paramName, paramValue, sep=" "))
++ }
+> getGraphs <- function(fileName){
++ 
++ plotFile<-read.csv(file = fileName, header=FALSE, stringsAsFactors=FALSE)[,1:2]
++ 
++ i<-1
++ j<-1
++ out<-data.frame(1:(ticks/10))
++ while(i<dim(plotFile)[1]){
++ if(plotFile[i,2]=="y"){
++ 
++ out[,plotFile[i-6,1]]<-plotFile[(i+1):(i+(ticks/10)),2]
++ j<- j+1
++ i<- i+(ticks/10)
++ }
++ i<-i+1
++ }
++ 
++ 
++ 
++ colNames <- c("K", "unsatisfied", "Payoffs", "TotalBM", "GreenPatches", "beta.i", "k.i", "numLoggers", "numCheaters")
++ out<-out[,-1]
++ 
++ colnames(out)<- colNames
++ 
++ 
++ for(i in 1:length(colNames)){
++ out[,i] <-as.numeric(out[,i])
++ }
++ 
++ return(out)
++ 
++ }
+> # 1. Define a function that runs the simulation model
+> # for a given parameter combination and returns the
+> # value(s) of the fitting criteria.
+> simExportPlots <- function(params) {
++ # params is vector with: cost, max-tree-growth, initial-loggers
++ #    reference-threshold, enfocement-level
++ #  in that order!
++ # for now high-tolerance = "True"
++ 
++ # open NetLogo
++ nl.path <- "/Applications/NetLogo\ 6.0.4/Java"
++ NLStart(nl.path, gui=FALSE, nl.jarname =  "netlogo-6.0.4.jar")
++ # open Endogenous Enforcement model
++ model.path <-"/Applications/NetLogo\ 6.0.4/models/ISmodels/Vallino_NL6/code/myModel1.nlogo"
++ NLLoadModel(model.path)
++ #ticks <- 2000
++ #runs <- 50
++ 
++ 
++ #set paramters
++ paramNames <- c("cost", "max-tree-growth", "initial-loggers", "reference-threshold", "monitoring-level", "initial-prob-cheat", "sanction-level")
++ for(i in 1:length(params)){
++ setParam(paramNames[i], params[i])
++ }
++ setParam("high-tolerance", "True") # for now always high tolerance
++ 
++ output <-list()
++ 
++ for(i in 1:runs){
++ # run simulation
++ NLCommand("setup")
++ NLDoCommand(ticks, "go")
++ 
++ 
++ NLCommand("export-all-plots \"exportPlots.csv\"")
++ output[[i]]<-getGraphs("exportPlots.csv")
++ 
++ }
++ 
++ return(output)
++ }
+> base.param <- c(5,20,100, 0.5, 50, 0.5, 0.5)
+> ###############################
+> runParams<- function(paramValues, base.param, fileName, variable){
++ dataOut <- list()
++ for(i in 1:length(paramValues)){
++ paramNames <- c("cost", "max-tree-growth", "initial-loggers", "reference-threshold", "monitoring-level", "initial-prob-cheat", "sanction-level")
++ varNum <- match(variable, paramNames)
++ newParams<-base.param
++ newParams[varNum] <- paramValues[i]
++ dataOut[[i]]<-simExportPlots(newParams)
++ 
++ save(dataOut, file=fileName)
++ }
++ 
++ return(dataOut)
++ }
+> ############################### ###############################
+> #change monitoring
+> paramVals <- (0:10)*10
+> dataMonitoring<- runParams(paramVals, base.param, "myMod_changeMonitoring_setUnsat.RData", "monitoring-level")
+> ###############################
+> #change initial-prob-cheat
+> paramVals <- (0:10)/10
+> dataCheat<- runParams(paramVals, base.param, "myMod_changeCheat_setUnsat.RData", "initial-prob-cheat")
+> ###############################
+> #change sanction
+> paramVals <- (0:10)/10
+> dataSanction<- runParams(paramVals, base.param, "myMod_changeSanction_setUnsat.RData", "sanction-level")
+> ###############################
+> #change cost
+> paramVals <- (0:10)*2
+> dataCost<- runParams(paramVals, base.param, "myMod_changeCost_setUnsat.RData", "cost")
+> ###############################
+> #change max-tree-growth
+> paramVals <- (1:6)*5
+> dataMTG<- runParams(paramVals, base.param, "myMod_changeMTG_setUnsat.RData", "max-tree-growth")
+> ####################################
+> # reference threshold
+> paramVals <- (1:10)/10
+> dataRT<- runParams(paramVals, base.param, "myMod_changeRT_setUnsat.RData", "reference-threshold")
+> ###############################
+> #change loggers
+> paramVals <- seq(60, 200, by=20)
+> dataLog<- runParams(paramVals, base.param, "myMod_changeLog_setUnsat.RData", "initial-loggers")
+> ###############################
+> #change cost
+> paramVals <- (0:10)*2
+> dataCost<- runParams(paramVals, base.param, "myMod_changeCost.RData", "cost")
+> library(RNetLogo)
+> library(tictoc)
+> testing <- "testing"
+> setwd("/Applications/NetLogo 6.0.4/models/ISmodels/Vallino_NL6/code")
+> #ticks<-5
+> #runs<-2
+> ticks<- 2000
+> runs<- 50
+> setParam <- function(paramName, paramValue){
++ NLCommand(paste("set", paramName, paramValue, sep=" "))
++ }
+> getGraphs <- function(fileName){
++ 
++ plotFile<-read.csv(file = fileName, header=FALSE, stringsAsFactors=FALSE)[,1:2]
++ 
++ i<-1
++ j<-1
++ out<-data.frame(1:(ticks/10))
++ while(i<dim(plotFile)[1]){
++ if(plotFile[i,2]=="y"){
++ 
++ out[,plotFile[i-6,1]]<-plotFile[(i+1):(i+(ticks/10)),2]
++ j<- j+1
++ i<- i+(ticks/10)
++ }
++ i<-i+1
++ }
++ 
++ 
++ 
++ colNames <- c("K", "unsatisfied", "Payoffs", "TotalBM", "GreenPatches", "beta.i", "k.i", "numLoggers", "numCheaters")
++ out<-out[,-1]
++ 
++ colnames(out)<- colNames
++ 
++ 
++ for(i in 1:length(colNames)){
++ out[,i] <-as.numeric(out[,i])
++ }
++ 
++ return(out)
++ 
++ }
+> # 1. Define a function that runs the simulation model
+> # for a given parameter combination and returns the
+> # value(s) of the fitting criteria.
+> simExportPlots <- function(params) {
++ # params is vector with: cost, max-tree-growth, initial-loggers
++ #    reference-threshold, enfocement-level
++ #  in that order!
++ # for now high-tolerance = "True"
++ 
++ # open NetLogo
++ nl.path <- "/Applications/NetLogo\ 6.0.4/Java"
++ NLStart(nl.path, gui=FALSE, nl.jarname =  "netlogo-6.0.4.jar")
++ # open Endogenous Enforcement model
++ model.path <-"/Applications/NetLogo\ 6.0.4/models/ISmodels/Vallino_NL6/code/myModel1.nlogo"
++ NLLoadModel(model.path)
++ #ticks <- 2000
++ #runs <- 50
++ 
++ 
++ #set paramters
++ paramNames <- c("cost", "max-tree-growth", "initial-loggers", "reference-threshold", "monitoring-level", "initial-prob-cheat", "sanction-level")
++ for(i in 1:length(params)){
++ setParam(paramNames[i], params[i])
++ }
++ setParam("high-tolerance", "True") # for now always high tolerance
++ 
++ output <-list()
++ 
++ for(i in 1:runs){
++ # run simulation
++ NLCommand("setup")
++ NLDoCommand(ticks, "go")
++ 
++ 
++ NLCommand("export-all-plots \"exportPlots.csv\"")
++ output[[i]]<-getGraphs("exportPlots.csv")
++ 
++ }
++ 
++ return(output)
++ }
+> base.param <- c(5,20,100, 0.5, 50, 0.5, 0.5)
+> ###############################
+> runParams<- function(paramValues, base.param, fileName, variable){
++ dataOut <- list()
++ for(i in 1:length(paramValues)){
++ paramNames <- c("cost", "max-tree-growth", "initial-loggers", "reference-threshold", "monitoring-level", "initial-prob-cheat", "sanction-level")
++ varNum <- match(variable, paramNames)
++ newParams<-base.param
++ newParams[varNum] <- paramValues[i]
++ dataOut[[i]]<-simExportPlots(newParams)
++ 
++ save(dataOut, file=fileName)
++ }
++ 
++ return(dataOut)
++ }
+> ############################### ###############################
+> #change monitoring
+> paramVals <- (0:10)*10
+> dataMonitoring<- runParams(paramVals, base.param, "myMod_changeMonitoring.RData", "monitoring-level")
+> ###############################
+> #change initial-prob-cheat
+> paramVals <- (0:10)/10
+> dataCheat<- runParams(paramVals, base.param, "myMod_changeCheat.RData", "initial-prob-cheat")
+> ###############################
+> #change sanction
+> paramVals <- (0:10)/10
+> dataSanction<- runParams(paramVals, base.param, "myMod_changeSanction.RData", "sanction-level")
+> ###############################
+> #change cost
+> paramVals <- (0:10)*2
+> dataCost<- runParams(paramVals, base.param, "myMod_changeCost.RData", "cost")
+> ###############################
+> #change max-tree-growth
+> paramVals <- (1:6)*5
+> dataMTG<- runParams(paramVals, base.param, "myMod_changeMTG.RData", "max-tree-growth")
+> ####################################
+> # reference threshold
+> paramVals <- (1:10)/10
+> dataRT<- runParams(paramVals, base.param, "myMod_changeRT.RData", "reference-threshold")
+> ###############################
+> #change loggers
+> paramVals <- seq(60, 200, by=20)
+> dataLog<- runParams(paramVals, base.param, "myMod_changeLog.RData", "initial-loggers")
+null

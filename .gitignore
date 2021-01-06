@@ -12,3 +12,8 @@ analysis/setupFile2.R
 analysis/setupVallino.R
 analysis/IS_analysis/
 analysis/distributionOfCheaters.Rmd
+analysis/IS_analysis/.DS_Store
+analysis/.DS_Store
+analysis/.Rhistory
+analysis/setupLVequations.R 
+analysis/FINAL_figures_3.2.2020.Rmd

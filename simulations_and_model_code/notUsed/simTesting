@@ -1,0 +1,62 @@
+library(RNetLogo)
+library(tictoc)
+
+
+# open NetLogo
+nl.path <- "/Applications/NetLogo\ 6.0.4/Java"
+NLStart(nl.path, gui=FALSE, nl.jarname =  "netlogo-6.0.4.jar")
+
+# open Endogenous Enforcement model
+model.path <-"/Applications/NetLogo\ 6.0.4/models/ISmodels/Vallino_NL6/code/Enforcement\ Endogenous\ Inst.nlogo"
+NLLoadModel(model.path)
+
+
+setParams <- function(paramName, paramValue){
+	NLCommand(paste("set", paramName, paramValue, sep=" "))	
+}
+
+setUp <- function(){
+setParams("cost", cost)
+setParams("max-tree-growth", maxGrowth)
+setParams("initial-loggers", loggers)
+setParams("high-tolerance", highTol)
+setParams("reference-threshold", ref_thresh) 
+setParams("enforcement-level", enf)
+}
+
+setUpDefault <- function(){
+	cost <- 5
+	maxGrowth <- 20
+	loggers <-100
+	highTol <- "True"
+	ref_thresh <- 0.45
+	enf <- 50
+	
+	setUp()
+}
+
+runs <- c(50,100)
+ticks <- 2000
+setUpDefault()
+
+tic()
+runs50_data <- data.frame()
+for(i in 1:runs[1]){
+	NLCommand("setup")
+	NLDoCommand(ticks, "go")
+	runs50_data[i,"biomass"]<- NLReport("sum [trees] of patches")
+
+}
+toc() #this took 9.8 hrs with 200000 ticks?? (problem with overnight?) - 845 sec for 2000 ticks
+save(runs50_data, file="testRuns.RData")
+
+tic()
+runs100_data <- data.frame()
+for(i in 1:runs[2]){
+	NLCommand("setup")
+	NLDoCommand(ticks, "go")
+	runs100_data[i,"biomass"]<- NLReport("sum [trees] of patches")
+
+}
+toc()
+save(runs50_data, runs100_data, file="testRuns3.RData")
