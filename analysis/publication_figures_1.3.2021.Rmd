@@ -13,7 +13,7 @@ library(gridExtra)
 library(ggpubr)
 library(colorspace)
 
-savePlots = FALSE # determine if running this file should save new plots 
+savePlots = TRUE # determine if running this file should save new plots 
 ```
 
 ```{r setupData, warning=FALSE}
@@ -272,25 +272,24 @@ baseJumpData<- baseJumpData%>%mutate(recentMeeting = finalJump>trough)
 ##########################
 
 
-kBM_base_plot<-baseJumpData%>%ggplot(aes(K, TotalBM*100))+ 
-  geom_point(aes(color=recentMeeting))+
-  xlim(0,20)+ ylim(0,45)+
-  setGraphs+
-  scale_color_manual(labels = c("No recent meeting", "Recent meeting"), values=c(color1, color2))+
-  theme(legend.title = element_blank())+
-  labs(y=axlab_bm, x=ax_kf)+ 
-  guides(color = guide_legend(override.aes = list(size = 3)))
-
-# this would create same graph but color based on number of meetings rather than recent meetings
-# kBM_base_plot<-jumpDF%>%ggplot(aes(K, TotalBM*100))+ 
-#   geom_point(aes(color=jumps > 3))+
+# kBM_base_plot<-baseJumpData%>%ggplot(aes(K, TotalBM*100))+ 
+#   geom_point(aes(color=recentMeeting))+
 #   xlim(0,20)+ ylim(0,45)+
 #   setGraphs+
-#   scale_color_manual(labels = c("< 3 meetings", "3 + meetings"), values=c(color1, color2))+
+#   scale_color_manual(labels = c("No recent meeting", "Recent meeting"), values=c(color1, color2))+
 #   theme(legend.title = element_blank())+
 #   labs(y=axlab_bm, x=ax_kf)+ 
 #   guides(color = guide_legend(override.aes = list(size = 3)))
-  
+
+#this would create same graph but color based on number of meetings rather than recent meetings
+kBM_base_plot<-jumpDF%>%ggplot(aes(K, TotalBM*100))+
+  geom_point(aes(color=jumps > 3), size = 1)+
+  xlim(0,20)+ ylim(0,45)+
+  setGraphs+
+  scale_color_manual(name = "Number of meetings", labels = c("1-2", "3+"), values=c(color1, color2))+
+  labs(y=axlab_bm, x=ax_kf)+ 
+  guides(color = guide_legend(override.aes = list(size = 3)))
+
 kBM_base_plot
 
 
@@ -306,7 +305,7 @@ relationship between K and BM - all data
 allData_plotK_BM<-allData%>%mutate(logger60= ((param=="log") & (variableValue==60)))
 
 kBM_allData_plot<-allData_plotK_BM%>%ggplot(aes(K, TotalBM*100, color=logger60))+ 
-  geom_point()+
+  geom_point(size = 1)+
   xlim(0,20)+ ylim(0,45)+
   setGraphs +
   scale_color_manual(breaks=c(TRUE, FALSE), labels = c("60 Loggers", "All other parameter sets"), values=c(color1, color2))+
@@ -363,16 +362,27 @@ rtJumpData<- rtJumpData%>%mutate(jumpCat = ifelse(as.numeric(numJumps)<2,"once",
 
 reference-threshold scatterplot
 ```{r m&s_rt_kf}
+# with recent meetings 
+# viz_rt_jump=rtJumpData%>%ggplot(aes(x = as.numeric(variableValue)/10, y = K, color=jumpCat))+
+#   geom_point(aes(shape=recentMeeting, size=recentMeeting), position="jitter")+
+#   geom_smooth(method='lm', se = FALSE, show.legend = FALSE)+ 
+#   scale_color_brewer(palette="Set2",breaks=c("once", "twice", "3+ times"),name="Number of meetings", labels = c("1", "2", "3+"))+
+#   scale_shape(name="", breaks=c(TRUE, FALSE), labels=c("Recent meeting", "No recent meeting"))+
+#   scale_size_manual(breaks=c(TRUE, FALSE), values=c(2.5,1.5))+
+#   labs(x=ax_rt, y=ax_kf)+
+#   setGraphs+ 
+#   guides(color = guide_legend(override.aes = list(size = 3)), shape = guide_legend(override.aes = list(size = 3)), size=FALSE)
 
+# no recent meetings 
 viz_rt_jump=rtJumpData%>%ggplot(aes(x = as.numeric(variableValue)/10, y = K, color=jumpCat))+
-  geom_point(aes(shape=recentMeeting, size=recentMeeting), position="jitter")+
+  geom_point(position="jitter")+
   geom_smooth(method='lm', se = FALSE, show.legend = FALSE)+ 
   scale_color_brewer(palette="Set2",breaks=c("once", "twice", "3+ times"),name="Number of meetings", labels = c("1", "2", "3+"))+
-  scale_shape(name="", breaks=c(TRUE, FALSE), labels=c("Recent meeting", "No recent meeting"))+
-  scale_size_manual(breaks=c(TRUE, FALSE), values=c(2.5,1.5))+
   labs(x=ax_rt, y=ax_kf)+
   setGraphs+ 
-  guides(color = guide_legend(override.aes = list(size = 3)), shape = guide_legend(override.aes = list(size = 3)), size=FALSE)
+  guides(color = guide_legend(override.aes = list(size = 3)))
+
+
 viz_rt_jump
 
 if(savePlots) ggsave("./figs/viz_rtJump.pdf", viz_rt_jump, width=5.75, height=3, units="in")
@@ -385,7 +395,7 @@ fig = fig+1
 monitoring and sanctioning scatterplots, with mon/sanc = 0.2 and 0.8
 ```{r m&s_monSanc}
 #monitoring plot
-viz_mon_2_8 = monitoringData%>% filter(variableValue == 20| variableValue == 80)%>%ggplot(aes(x= K, y = TotalBM*100))+
+viz_mon_2_8 = monitoringData%>% filter(variableValue == 0.2| variableValue == 0.8)%>%ggplot(aes(x= K, y = TotalBM*100))+
   geom_point(aes(color = variableValue))+
   labs(color = ax_mon)+
   ylab(axlab_bm)+
@@ -413,7 +423,7 @@ viz_sanc_2_8 = sanctionData%>% filter(variableValue == 2| variableValue == 8)%>%
 
 viz_monSanc_2_8=grid.arrange(arrangeGrob(arrangeGrob(viz_mon_2_8+ggtitle("a)"),viz_sanc_2_8+ggtitle("b)"), ncol=2, nrow=1)))
 
-if(savePlots) ggsave("./figs/viz_monSanc.2.8.pdf", viz_monSanc_2_8, width=6, height=3, units="in")
+if(savePlots) ggsave("./figs/viz_monSanc.2.8.pdf", viz_monSanc_2_8, width=6.5, height=3, units="in")
 
 fig = fig+1
 
@@ -421,28 +431,24 @@ fig = fig+1
 
 
 
-```{r, eval = FALSE}
-#export data frames to csv
+linear regressin models 
+```{r}
+vallino_lm_data = enfData_vallino%>%mutate(monLevel = (1-as.numeric(as.character(variableValue))/100))
 
-setwd("~/Documents/WoosterStuff/fall2019/IS_organized/analysis/allData_IS/M&S_model_data")
+vallino_lm = lm(TotalBM*100 ~ numLoggers+K+monLevel, data = vallino_lm_data)
+summary(vallino_lm)
 
-write.csv(allData, "allData.csv")
-write.csv(costData, "costData.csv")
-write.csv(mtgData, "mtgData.csv")
-write.csv(logData, "logData.csv")
-write.csv(rtData, "rtData.csv")
-write.csv(monitoringData, "monitoringData.csv")
-write.csv(cheatData, "cheatData.csv")
-write.csv(sanctionData, "sanctionData.csv")
+vallino_lm2 = lm(TotalBM*100 ~ numLoggers+monLevel, data = vallino_lm_data%>%filter(monLevel != 0))
+summary(vallino_lm2)
 
-setwd("~/Documents/WoosterStuff/fall2019/IS_organized/analysis/allData_IS/vallinoData")
+monitoring_lm = lm(TotalBM*100 ~ K+as.numeric(as.character(variableValue)), data = monitoringData)
+summary(monitoring_lm)
 
-write.csv(allData_vallino, "allData_vallino.csv")
-write.csv(costData_vallino, "costData_vallino.csv")
-write.csv(mtgData_vallino, "mtgData_vallino.csv")
-write.csv(logData_vallino, "logData_vallino.csv")
-write.csv(rtData_vallino, "rtData_vallino.csv")
-write.csv(enfData_vallino, "enfData_vallino.csv")
+sanction_lm = lm(TotalBM*100 ~ K+as.numeric(as.character(variableValue)), data = sanctionData)
+summary(sanction_lm)
 
+mon_sanc_data = allData%>%filter(param == "monitoring" | param == "sanction")%>%mutate(monitoring = ifelse(param == "monitoring", as.numeric(as.character(variableValue)), 0.5), sanction = ifelse(param == "sanction", as.numeric(as.character(variableValue)), 5)/10 )
+mon_sanc_lm = lm(TotalBM*100 ~ K + monitoring + sanction, data = mon_sanc_data)
+summary(mon_sanc_lm)
 ```
 
