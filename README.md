@@ -9,7 +9,7 @@ Folder containing model code and code used to run the sensitivity analysis simul
 Folder containing data from simulation runs, code to clean the data, figures, and code to replicate the figures. 
 
 Important files: 
-- `publication_figures_1.3.2021`: A file replicating all figures in the article using the data given in allData_IS/
+- `publication_figures_1.3.2021.Rmd`: A file replicating all figures in the article using the data given in allData_IS/
 - `dataCleaningFunctions.R`: File with functions used for data cleaning (and when creating select figures) 
 - `dataCleaningFunctions.R`: script used to convert data files from running NetLogo simulations into usable data 
 - `process_m&s_data.R`: script used to clean M&S model data
