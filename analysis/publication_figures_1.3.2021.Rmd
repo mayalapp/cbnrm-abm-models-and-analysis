@@ -7,13 +7,13 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-setwd("~/Documents/WoosterStuff/fall2019/IS_organized/analysis")
+#setwd("~/Documents/WoosterStuff/fall2019/IS_organized/analysis")
 library(tidyverse)
 library(gridExtra)
 library(ggpubr)
 library(colorspace)
 
-savePlots = TRUE # determine if running this file should save new plots 
+savePlots = FALSE # determine if running this file should save new plots 
 ```
 
 ```{r setupData, warning=FALSE}
@@ -134,8 +134,18 @@ if(savePlots) ggsave("./figs/viz_bravo2.pdf", viz_bravo, width=5.75, height=4, u
 fig = fig+1
 ```
 
+Check model steady state: 
+```{r}
+maxBM = endogInst_data$TotalBM[1] # initial BM in the simulation 
+endogInst_data = endogInst_data%>%mutate(TotalBM = TotalBM/maxBM) # convert Total BM to % remaining
+check_steadstate = endogInst_data%>%filter(Period >= 200) # filter out beginning of simulation 
+mean(check_steadstate$TotalBM)
+sd(check_steadstate$TotalBM)
+```
 
-## Original Vallino model analyss 
+
+
+## Original Vallino model analysis 
 
 ### Figure `r fig`
 Minimal cut polarization - Bravo data 
