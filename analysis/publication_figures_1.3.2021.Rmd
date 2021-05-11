@@ -9,9 +9,11 @@ output: html_document
 knitr::opts_chunk$set(echo = FALSE)
 #setwd("~/Documents/WoosterStuff/fall2019/IS_organized/analysis")
 library(tidyverse)
+library(grid)
 library(gridExtra)
 library(ggpubr)
 library(colorspace)
+library(png)
 
 savePlots = FALSE # determine if running this file should save new plots 
 ```
@@ -82,6 +84,17 @@ fig = 1 # count figure number for Rmarkdown report
 
 ### Figure `r fig`
 Bravo single run
+
+
+```{r}
+s_start = readPNG("./figs/screenshot_beginning.png")%>%rasterGrob()
+s_end = readPNG("./figs/screenshot_end.png")%>%rasterGrob()
+void = ggplot()+theme_void()
+screenshots = grid.arrange(void+ ggtitle("a)"), s_start, void+ ggtitle("b)"), s_end,widths = c(1,10, 1, 10))
+
+if(savePlots) ggsave("./figs/screenshots.pdf", screenshots, width=5.75, height=3.5, units="in")
+fig = fig+1
+```
 
 
 ```{r bravoRun}
@@ -387,7 +400,7 @@ reference-threshold scatterplot
 # no recent meetings 
 viz_rt_jump=rtJumpData%>%ggplot(aes(x = as.numeric(variableValue)/10, y = K, color=jumpCat))+
   geom_point(position="jitter")+
-  geom_smooth(method='lm', se = FALSE, show.legend = FALSE)+ 
+  geom_smooth(data = rtJumpData%>%filter(jumpCat !="once"), method='lm', se = FALSE, show.legend = FALSE)+ #get rid of data = argument to include regression line for communities that have only met once
   scale_color_brewer(palette="Set2",breaks=c("once", "twice", "3+ times"),name="Number of meetings", labels = c("1", "2", "3+"))+
   labs(x=ax_rt, y=ax_kf)+
   setGraphs+ 
@@ -396,7 +409,7 @@ viz_rt_jump=rtJumpData%>%ggplot(aes(x = as.numeric(variableValue)/10, y = K, col
 
 viz_rt_jump
 
-if(savePlots) ggsave("./figs/viz_rtJump.pdf", viz_rt_jump, width=5.75, height=3, units="in")
+if(savePlots) ggsave("./figs/viz_rtJump_removeRedRegression.pdf", viz_rt_jump, width=5.75, height=3, units="in")
 
 fig = fig+1
 
