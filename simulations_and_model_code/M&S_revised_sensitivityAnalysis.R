@@ -5,18 +5,19 @@ library(tictoc)
 testing <- "testing"
 setwd("/Applications/NetLogo 6.0.4/models/ISmodels/Vallino_NL6/code")
 
-#ticks<-5 # for testing 
-#runs<-2
-ticks<- 2000
-runs<- 50
-diff <-8 # this number edits how far to go back on the NetLogo excel output to find the label for the plot that is being exported. If an error occurs (e.g. colNames not correct length, check/change this number appropriately)
+ticks<-5 # for testing
+runs<-2
+#ticks<- 2000
+#runs<- 50
+diff <-6 # this number edits how far to go back on the NetLogo excel output to find the label for the plot that is being exported. If an error occurs (e.g. colNames not correct length, check/change this number appropriately)
+
 
 setParam <- function(paramName, paramValue){
 	NLCommand(paste("set", paramName, paramValue, sep=" "))	
 }
 
 getGraphs <- function(fileName){
-setwd("/Applications/NetLogo 6.0.4/models/ISmodels/Vallino_NL6/code")
+	
 plotFile<-read.csv(file = fileName, header=FALSE, stringsAsFactors=FALSE)[,1:2]
 
 i<-1
@@ -63,14 +64,14 @@ simExportPlots <- function(params) {
 	nl.path <- "/Applications/NetLogo\ 6.0.4/Java"
 	NLStart(nl.path, gui=FALSE, nl.jarname =  "netlogo-6.0.4.jar")
 	# open Endogenous Enforcement model
-	model.path <-"/Applications/NetLogo\ 6.0.4/models/ISmodels/Vallino_NL6/code/Enforcement\ Endogenous\ Inst\ CORRECTED.nlogo"
+	model.path <-"/Applications/NetLogo\ 6.0.4/models/ISmodels/Vallino_NL6/code/M&Smodel_revised.nlogo"
 	NLLoadModel(model.path)
 	#ticks <- 2000
 	#runs <- 50
 	
 	
 	#set paramters
-	paramNames <- c("cost", "max-tree-growth", "initial-loggers", "reference-threshold", "enforcement-level")
+	paramNames <- c("cost", "max-tree-growth", "initial-loggers", "reference-threshold", "monitoring-level", "initial-prob-cheat", "sanction-level")
            for(i in 1:length(params)){
 				setParam(paramNames[i], params[i]) 
 			}
@@ -83,6 +84,7 @@ for(i in 1:runs){
 	NLCommand("setup")
 	NLDoCommand(ticks, "go")
 
+	
 	NLCommand("export-all-plots \"exportPlots.csv\"") 
 	output[[i]]<-getGraphs("exportPlots.csv") 
 
@@ -93,7 +95,7 @@ for(i in 1:runs){
 
 
 
-base.param <- c(5,20,100, 0.5, 50)
+base.param <- c(5,20,100, 0.5, 50, 0.5, 0.5)
 
 
  ###############################
@@ -101,8 +103,8 @@ base.param <- c(5,20,100, 0.5, 50)
 runParams<- function(paramValues, base.param, fileName, variable){
 	dataOut <- list()
 	for(i in 1:length(paramValues)){
-		paramNames <- c("cost", "max-tree-growth", "initial-loggers", "reference-threshold", "enforcement-level")
-		varNum <- match(variable, paramNames)
+		paramNames <- c("cost", "max-tree-growth", "initial-loggers", "reference-threshold", "monitoring-level", "initial-prob-cheat", "sanction-level")
+        varNum <- match(variable, paramNames)
 		newParams<-base.param
 		newParams[varNum] <- paramValues[i]
 		dataOut[[i]]<-simExportPlots(newParams)
@@ -110,7 +112,43 @@ runParams<- function(paramValues, base.param, fileName, variable){
 	save(dataOut, file=fileName)
 	
 	print(paramValues[i])
+	
 	}
 	
 	return(dataOut)
 }
+
+ ############################### ###############################
+#change monitoring 
+paramVals <- (0:10)*10
+dataMonitoring<- runParams(paramVals, base.param, "myMod_changeMonitoring.RData", "monitoring-level")
+
+ ###############################
+#change initial-prob-cheat
+paramVals <- (0:10)/10
+dataCheat<- runParams(paramVals, base.param, "myMod_changeCheat.RData", "initial-prob-cheat")
+ 
+ ###############################
+#change sanction
+paramVals <- (0:10)/10
+dataSanction<- runParams(paramVals, base.param, "myMod_changeSanction.RData", "sanction-level")
+###############################
+#change cost 
+paramVals <- (0:10)*2
+dataCost<- runParams(paramVals, base.param, "myMod_changeCost.RData", "cost")
+
+###############################
+#change max-tree-growth 
+paramVals <- (1:6)*5
+dataMTG<- runParams(paramVals, base.param, "myMod_changeMTG.RData", "max-tree-growth")
+
+####################################
+# reference threshold 
+paramVals <- (1:10)/10
+dataRT<- runParams(paramVals, base.param, "myMod_changeRT.RData", "reference-threshold")
+
+###############################
+#change loggers
+paramVals <- seq(60, 200, by=20)
+dataLog<- runParams(paramVals, base.param, "myMod_changeLog.RData", "initial-loggers")
+
