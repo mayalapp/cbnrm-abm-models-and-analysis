@@ -40,5 +40,5 @@ baseData_vallinoCorrected<-allData_vallinoCorrected%>%filter((param=="cost" & va
 
 save(vallinoCorrected_dataCost, vallinoCorrected_dataMTG, vallinoCorrected_dataLog, vallinoCorrected_dataRT, vallinoCorrected_dataEnf, 
      costData_vallinoCorrected, mtgData_vallinoCorrected, logData_vallinoCorrected, rtData_vallinoCorrected, enfData_vallinoCorrected, 
-     baseData_vallinoCorrected, allData_vallinoCorrected, file = "CE_Corrected_model_data.RData")
+     baseData_vallinoCorrected, allData_vallinoCorrected, file = "CE_Corrected_model_data_clean.RData")
 
