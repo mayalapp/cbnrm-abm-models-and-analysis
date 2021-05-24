@@ -9,6 +9,7 @@ setwd("/Applications/NetLogo 6.0.4/models/ISmodels/Vallino_NL6/code")
 #runs<-2
 ticks<- 2000
 runs<- 50
+diff <-8 # this number edits how far to go back on the NetLogo excel output to find the label for the plot that is being exported. If an error occurs (e.g. colNames not correct length, check/change this number appropriately)
 
 setParam <- function(paramName, paramValue){
 	NLCommand(paste("set", paramName, paramValue, sep=" "))	
@@ -24,7 +25,7 @@ out<-data.frame(1:(ticks/10))
 while(i<dim(plotFile)[1]){
 	if(plotFile[i,2]=="y"){
 		
-		out[,plotFile[i-8,1]]<-plotFile[(i+1):(i+(ticks/10)),2]
+		out[,plotFile[i-diff,1]]<-plotFile[(i+1):(i+(ticks/10)),2]
 		j<- j+1
 		i<- i+(ticks/10)
 	}

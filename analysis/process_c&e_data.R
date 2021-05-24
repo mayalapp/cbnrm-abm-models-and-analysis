@@ -1,4 +1,4 @@
-# setwd("~/Documents/WoosterStuff/fall2019/IS_organized/analysis/allData_IS/vallinoData")
+#setwd("~/Documents/coding_projects/IS_organized/analysis")
 
 load("./allData_IS/vallinoData/vallino_changeCost.RData")
 vallino_dataCost<-dataOut
