@@ -1,5 +1,5 @@
 ###############################
-setwd("~/Documents/WoosterStuff/fall2019/IS_organized/analysis")
+#setwd("~/Documents/coding_projects/IS_organized/analysis")
 
 # Two sets of data. They were run under identical conditions (run to ensure the same results were obtained) and either can be used to create the figures.  
 

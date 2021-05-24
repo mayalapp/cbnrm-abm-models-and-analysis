@@ -1,5 +1,5 @@
 ###############################
-setwd("~/Documents/WoosterStuff/fall2019/IS_organized/analysis")
+setwd("~/Documents/coding_projects/IS_organized/analysis")
 
   load("./allData_IS/M&S_revised_model_data/myMod_revised_changeCost.RData")
   dataCost_revised<-dataOut
