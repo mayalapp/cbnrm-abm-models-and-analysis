@@ -5,10 +5,10 @@ library(tictoc)
 testing <- "testing"
 setwd("/Applications/NetLogo 6.0.4/models/ISmodels/Vallino_NL6/code")
 
-ticks<-5 # for testing
-runs<-2
-#ticks<- 2000
-#runs<- 50
+#ticks<-5 # for testing
+#runs<-2
+ticks<- 2000
+runs<- 50
 diff <-6 # this number edits how far to go back on the NetLogo excel output to find the label for the plot that is being exported. If an error occurs (e.g. colNames not correct length, check/change this number appropriately)
 
 
