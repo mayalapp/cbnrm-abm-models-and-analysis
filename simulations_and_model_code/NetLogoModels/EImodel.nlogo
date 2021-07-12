@@ -223,10 +223,10 @@ NIL
 1
 
 SLIDER
-223
-207
-395
-240
+163
+150
+335
+183
 initial-loggers
 initial-loggers
 10
@@ -344,9 +344,9 @@ HORIZONTAL
 
 SLIDER
 162
-159
+110
 334
-192
+143
 reference-threshold
 reference-threshold
 0.25
@@ -413,10 +413,10 @@ count turtles
 13
 
 PLOT
-741
-516
-941
-666
+484
+583
+684
+733
 Loggers
 NIL
 NIL
@@ -431,10 +431,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count turtles"
 
 PLOT
-77
-589
-277
-739
+71
+582
+271
+732
 highMinCut
 NIL
 NIL
@@ -449,10 +449,10 @@ PENS
 "default" 1.0 0 -16777216 true "" ""
 
 PLOT
-296
-590
-496
-740
+278
+583
+478
+733
 lowMinCut
 NIL
 NIL

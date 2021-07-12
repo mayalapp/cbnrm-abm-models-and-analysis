@@ -295,7 +295,7 @@ initial-loggers
 initial-loggers
 0
 2000
-200.0
+100.0
 10
 1
 NIL
@@ -376,10 +376,10 @@ PENS
 "default" 1.0 0 -16777216 true "" ""
 
 PLOT
-293
-437
-493
-587
+225
+462
+425
+612
 unsatisfied
 NIL
 NIL
@@ -394,10 +394,10 @@ PENS
 "default" 1.0 0 -16777216 true "" ""
 
 PLOT
-528
-449
-728
-599
+432
+463
+632
+613
 Payoffs
 NIL
 NIL
@@ -430,9 +430,9 @@ PENS
 "default" 1.0 0 -16777216 true "" ""
 
 PLOT
-23
+17
 463
-223
+217
 613
 Green patches
 NIL
@@ -484,10 +484,10 @@ PENS
 "default" 1.0 0 -16777216 true "" ""
 
 PLOT
-683
-206
-886
-357
+645
+624
+848
+775
 Number of loggers
 NIL
 NIL
@@ -502,10 +502,10 @@ PENS
 "default" 1.0 0 -16777216 true "" ""
 
 PLOT
-773
-450
-973
-600
+643
+464
+843
+614
 numCheaters
 NIL
 NIL

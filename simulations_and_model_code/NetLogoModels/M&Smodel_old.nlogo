@@ -108,7 +108,7 @@ to turtle-actions
   ask turtles [
 
     ; Model change: make all Loggers move at the beginning of their actions
-    ; move-turtles
+    move-turtles
 
     ; update payoff (living costs)
     set payoff payoff - cost
@@ -122,7 +122,7 @@ to turtle-actions
     ; Model changes:
     ;     Loggers can only cheat when [trees] of patch-here != 0
     ;     Monitoring and sanctioning are introduced
-    [ifelse ((abs (minimal-cut - current-institution) > tolerance-threshold or payoff-satisfaction = 0) and [trees] of patch-here != 0)
+    [if ((abs (minimal-cut - current-institution) > tolerance-threshold or payoff-satisfaction = 0) and [trees] of patch-here != 0)
       ; check if Logger will cheat
       [if ((random 100) / 100 < prob-cheat)
         [log-here
@@ -132,18 +132,11 @@ to turtle-actions
 
          ; monitoring and sanctioning
          ifelse random 100 < monitoring-level ; is cheater caught?
-             [
-                set prob-cheat prob-cheat - prob-cheat * sanction-level
-                move-turtles
-             ]
-             [
-                set prob-cheat prob-cheat + (1 - prob-cheat) * sanction-level
-                move-turtles
-             ]
+             [set prob-cheat prob-cheat - prob-cheat * sanction-level]
+             [set prob-cheat prob-cheat + (1 - prob-cheat) * sanction-level]
          ]
 
        ]
-      [move-turtles]
     ]
   ]
 
@@ -182,14 +175,14 @@ end
 ; resetting payoff
 to compute-satisfaction
 
+  ; Model change: how payoff-satisfaction is computed
+  ask turtles with [payoff > old-payoff][
+    set payoff-satisfaction 1
+   ]
 
-  ; Model correction: change payoff-satisfaction to be reset here (at beginning of function) so correct payoff-satisfaction remains for entire period
-  ask turtles [
-        set payoff-satisfaction 1
-  ]
-
-  ; Original C&E version of updating payoff-satisfaction
   ask turtles with [payoff < old-payoff] [
+    if payoff-satisfaction = 1[
+
     let q (payoff - old-payoff) / (abs payoff + abs old-payoff)
     if (- random-float 1) > q [
       set payoff-satisfaction 0
@@ -198,6 +191,7 @@ to compute-satisfaction
         [set minimal-cut min list (minimal-cut + random 10) (max-tree-growth + 1)]
     ]
   ]
+    ]
 
 
  ; "endogenous institution" rules and evolution
@@ -209,6 +203,8 @@ to compute-satisfaction
 
   ; plotting emergent behaviors
   set-current-plot "K"
+  plot current-institution
+  set-current-plot "Strictness of regulations"
   plot current-institution
   set-current-plot "Green patches"
   plot count patches with [trees > 0]
@@ -584,6 +580,24 @@ PLOT
 671
 403
 Number of cheaters
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" ""
+
+PLOT
+574
+145
+750
+273
+Strictness of regulations
 NIL
 NIL
 0.0
