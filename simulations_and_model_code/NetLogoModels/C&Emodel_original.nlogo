@@ -97,10 +97,7 @@ to turtle-actions
         ]
 
     ; COMMENT: cheating
-
-    ; why does logger cheat if current-inst << minimal-cut? shouldn't they only cheat if current-inst >> minimal-cut?
-   ; payoff-satisfaction is always 1! doesn't change until after this, and then changes back within same function (see compute satisfaction)
-      [ifelse (abs (minimal-cut - current-institution) > tolerance-threshold or payoff-satisfaction = 0)
+     [ifelse (abs (minimal-cut - current-institution) > tolerance-threshold or payoff-satisfaction = 0)
        [
              set payoff payoff + [trees] of patch-here
              set cheater? TRUE
@@ -111,7 +108,7 @@ to turtle-actions
              ; COMMENT: enforcement
              ifelse probability-to-be-caught > enforcement-level
              [set num-cheaters num-cheaters + 1
-              die] ; COMMENT: this enfocement mechanism doesn't make much sense
+              die]
              [move-turtles]
 
             ]
@@ -121,8 +118,6 @@ to turtle-actions
 
   ]
 
-  ; check if payoff-satisfaction is being changed
-  if any? turtles with [payoff-satisfaction = 0] [print "yes"]
 end
 
 to move-turtles
@@ -156,7 +151,7 @@ to compute-satisfaction
   let unsatisfied count  turtles with [abs (minimal-cut - current-institution) > tolerance-threshold or payoff-satisfaction = 0]
   if  unsatisfied > (0.66666 * initial-loggers) [
     set current-institution mean [minimal-cut] of turtles
-    ;print "change institution"
+
   ]
 
 
