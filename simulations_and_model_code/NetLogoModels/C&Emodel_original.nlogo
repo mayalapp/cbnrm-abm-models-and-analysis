@@ -1,164 +1,125 @@
-; global variables (including Institution variables)
 globals [
   growth-prob
   satisfaction
   current-institution
   tolerance-threshold
-  unsatisfied
   num-cheaters
 ]
 
-; Logger variables
 turtles-own [
   payoff
   minimal-cut
   reference-trees
   old-payoff
   payoff-satisfaction
-  prob-cheat
+  probability-to-be-caught
+
   cheater?
 ]
 
-; patch variables
 patches-own [
   trees
   living-neighbors
 ]
 
-
-; setting up the simulation
 to setup
+  ;; (for this model to work with NetLogo's new plotting features,
+  ;; __clear-all-and-reset-ticks should be replaced with clear-all at
+  ;; the beginning of your setup procedure and reset-ticks at the end
+  ;; of the procedure.)
   clear-all
 
   ; used to match old version (NetLogo 4.3) default world size
   resize-world 0 50 0 50
   set-patch-size 5
 
-  ; setting original values and model vizuals
+  set num-cheaters 0
   set growth-prob .05
   set current-institution 0
-  set unsatisfied 0
-
+  let i 0
   set-default-shape turtles "circle"
   ifelse high-tolerance = true
     [set tolerance-threshold  (2 * max-tree-growth) / 3]
     [set tolerance-threshold  max-tree-growth / 3]
   ask patches [
-    set trees random (max-tree-growth - max-tree-growth / 2) +
-        max-tree-growth / 2 + 1
+    set trees random (max-tree-growth - max-tree-growth / 2) + max-tree-growth / 2 + 1
     set pcolor 60 + 5 * (trees / max-tree-growth)
   ]
-
-  ; initializing Loggers
   crt initial-loggers
   ask turtles [
+    set cheater? FALSE
     setxy random-pxcor random-pycor
     set payoff 0
     set old-payoff 0
     set minimal-cut 0
     set payoff-satisfaction 1
-    set reference-trees  (max-pxcor * max-pycor) * random-normal reference-threshold 0.25
-
-    set prob-cheat initial-prob-cheat
-    set cheater? FALSE
+    set reference-trees  (max-pxcor * max-pycor) * random-normal reference-threshold 0.25 ;
   ]
   compute-satisfaction
 
   reset-ticks
 end
 
-; steps in one tick of the model
 to go
-  ; update tick (+ 1)
   tick
   tree-growth
   turtle-actions
-
-  ; if we have reached the end a period, implement rules that occur at the end of a period
   if ticks mod 10 = 0 [compute-satisfaction]
-
-  ; stop simulation after 20,000 ticks
   if ticks = 20000 [stop]
 end
 
-
-; rules governing tree growth
 to tree-growth
-  ; calculate living neighbors for each patch
   ask patches [set living-neighbors count neighbors with [trees > 0] ]
-
-  ; see if an empty patch should regrow
   ask patches with [trees = 0] [
     if (random 1001 / 1000) < growth-prob * ((living-neighbors + 1) / 9) [
       set trees 1
       set pcolor 60 + 5 * (trees / max-tree-growth)
     ]
   ]
-
-  ; allow living patches to grow (if they have not reached max-tree-growth)
   ask patches with [trees > 0 and trees < max-tree-growth] [
     set trees trees + .5
     set pcolor 60 + 5 * (trees / max-tree-growth)
     ]
 end
 
-
-; logger actions for each tick
 to turtle-actions
   ask turtles [
-
-    ; Model change: make all Loggers move at the beginning of their actions
-    ; move-turtles
-
-    ; update payoff (living costs)
     set payoff payoff - cost
+    set probability-to-be-caught random 100
 
-    ; if rules permit, log the patch they are on
+
     ifelse ([trees] of patch-here > current-institution)
-    [log-here]
+    [
+             set payoff payoff + [trees] of patch-here
+             ask patch-here [
+             set trees 0
+             set pcolor black]
+        ]
 
-    ; If rules do not permit, see if the Logger will cheat
+    ; COMMENT: cheating
+     [ifelse (abs (minimal-cut - current-institution) > tolerance-threshold or payoff-satisfaction = 0)
+       [
+             set payoff payoff + [trees] of patch-here
+             set cheater? TRUE
+             ask patch-here [
+             set trees 0
+             set pcolor black]
 
-    ; Model changes:
-    ;     Loggers can only cheat when [trees] of patch-here != 0
-    ;     Monitoring and sanctioning are introduced
-    [ifelse ((abs (minimal-cut - current-institution) > tolerance-threshold or payoff-satisfaction = 0) and [trees] of patch-here != 0)
-      ; check if Logger will cheat
-      [if ((random 100) / 100 < prob-cheat)
-        [log-here
+             ; COMMENT: enforcement
+             ifelse probability-to-be-caught > enforcement-level
+             [set num-cheaters num-cheaters + 1
+              die]
+             [move-turtles]
 
-         ; track cheaters
-         set cheater? TRUE
+            ]
+       [move-turtles]
+  ]
 
-         ; monitoring and sanctioning
-         ifelse random 100 < monitoring-level ; is cheater caught?
-             [
-                set prob-cheat prob-cheat - prob-cheat * sanction-level
-                move-turtles
-             ]
-             [
-                set prob-cheat prob-cheat + (1 - prob-cheat) * sanction-level
-                move-turtles
-             ]
-         ]
 
-       ]
-      [move-turtles]
-    ]
   ]
 
 end
 
-
-; rules for Logging
-to log-here
-  set payoff payoff + [trees] of patch-here
-  ask patch-here [
-      set trees 0
-      set pcolor black]
-end
-
-; rules for Logger movement
 to move-turtles
   let green-patches patches in-radius 2.83 with [trees > current-institution]
   ifelse count green-patches = 0
@@ -174,21 +135,7 @@ to move-turtles
     ]
 end
 
-; rules implemented at the end of each period including:
-; Logger payoff-satisfaction update
-; Institution updates
-; plotting model outputs
-; Logger "selection" process
-; resetting payoff
 to compute-satisfaction
-
-
-  ; Model correction: change payoff-satisfaction to be reset here (at beginning of function) so correct payoff-satisfaction remains for entire period
-  ask turtles [
-        set payoff-satisfaction 1
-  ]
-
-  ; Original C&E version of updating payoff-satisfaction
   ask turtles with [payoff < old-payoff] [
     let q (payoff - old-payoff) / (abs payoff + abs old-payoff)
     if (- random-float 1) > q [
@@ -200,14 +147,14 @@ to compute-satisfaction
   ]
 
 
- ; "endogenous institution" rules and evolution
-  set unsatisfied count  turtles with [abs (minimal-cut - current-institution) > tolerance-threshold or payoff-satisfaction = 0]
+ ; COMMENT: "endogenous institution"
+  let unsatisfied count  turtles with [abs (minimal-cut - current-institution) > tolerance-threshold or payoff-satisfaction = 0]
   if  unsatisfied > (0.66666 * initial-loggers) [
     set current-institution mean [minimal-cut] of turtles
+
   ]
 
 
-  ; plotting emergent behaviors
   set-current-plot "K"
   plot current-institution
   set-current-plot "Green patches"
@@ -225,13 +172,13 @@ to compute-satisfaction
   set-current-plot "Number of Loggers"
   plot count turtles
 
-  set num-cheaters count turtles with [cheater?]
-  set-current-plot "Number of cheaters"
+  set num-cheaters num-cheaters + count turtles with [cheater?]
+  set-current-plot "numCheaters"
   plot num-cheaters
   ask turtles [set cheater? FALSE]
+  set num-cheaters 0
 
 
-  ; selection process
   ask one-of turtles with [payoff = min [payoff] of turtles] [ die ]
   ask one-of turtles with [payoff = max [payoff] of turtles] [
     hatch 1 [
@@ -243,17 +190,18 @@ to compute-satisfaction
   ask turtles [
     set old-payoff payoff
     set payoff 0
+    set payoff-satisfaction 1
   ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-303
+309
 10
-566
-274
+654
+356
 -1
 -1
-5.0
+6.61
 1
 10
 1
@@ -274,10 +222,10 @@ ticks
 30.0
 
 SLIDER
-120
-10
-292
-43
+119
+27
+291
+60
 cost
 cost
 0
@@ -289,10 +237,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-120
-48
-292
-81
+119
+91
+291
+124
 max-tree-growth
 max-tree-growth
 0
@@ -304,12 +252,12 @@ NIL
 HORIZONTAL
 
 SLIDER
-120
-164
-292
-197
-monitoring-level
-monitoring-level
+117
+158
+289
+191
+enforcement-level
+enforcement-level
 0
 100
 50.0
@@ -319,10 +267,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-120
-125
-292
-158
+112
+220
+291
+253
 reference-threshold
 reference-threshold
 0
@@ -334,10 +282,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-119
-88
-291
-121
+108
+277
+280
+310
 initial-loggers
 initial-loggers
 0
@@ -349,10 +297,10 @@ NIL
 HORIZONTAL
 
 SWITCH
-2
-167
-114
-200
+124
+339
+273
+372
 high-tolerance
 high-tolerance
 0
@@ -377,10 +325,10 @@ NIL
 1
 
 BUTTON
-21
-69
-84
-102
+26
+80
+89
+113
 NIL
 go\n
 T
@@ -394,10 +342,10 @@ NIL
 1
 
 MONITOR
-8
-113
-101
-158
+12
+144
+105
+189
 NIL
 count turtles
 17
@@ -405,10 +353,10 @@ count turtles
 11
 
 PLOT
-344
-283
-504
-403
+432
+622
+632
+772
 K
 NIL
 NIL
@@ -423,10 +371,10 @@ PENS
 "default" 1.0 0 -16777216 true "" ""
 
 PLOT
-12
-403
-172
-523
+225
+462
+425
+612
 unsatisfied
 NIL
 NIL
@@ -441,10 +389,10 @@ PENS
 "default" 1.0 0 -16777216 true "" ""
 
 PLOT
-180
-404
-340
-524
+432
+463
+632
+613
 Payoffs
 NIL
 NIL
@@ -459,10 +407,10 @@ PENS
 "default" 1.0 0 -16777216 true "" ""
 
 PLOT
-574
-10
-749
-135
+684
+14
+884
+164
 Total Biomass
 NIL
 NIL
@@ -477,10 +425,10 @@ PENS
 "default" 1.0 0 -16777216 true "" ""
 
 PLOT
-13
-281
-173
-401
+17
+463
+217
+613
 Green patches
 NIL
 NIL
@@ -495,10 +443,10 @@ PENS
 "default" 1.0 0 -16777216 true "" ""
 
 PLOT
-345
-404
-505
-524
+17
+625
+217
+775
 beta(i)
 NIL
 NIL
@@ -513,10 +461,10 @@ PENS
 "default" 1.0 0 -16777216 true "" ""
 
 PLOT
-511
-405
-671
-525
+224
+625
+424
+775
 k(i)
 NIL
 NIL
@@ -531,10 +479,10 @@ PENS
 "default" 1.0 0 -16777216 true "" ""
 
 PLOT
-179
-282
-339
-402
+645
+624
+848
+775
 Number of loggers
 NIL
 NIL
@@ -548,42 +496,12 @@ false
 PENS
 "default" 1.0 0 -16777216 true "" ""
 
-SLIDER
-120
-204
-292
-237
-initial-prob-cheat
-initial-prob-cheat
-0
-1
-0.5
-0.01
-1
-NIL
-HORIZONTAL
-
-SLIDER
-119
-245
-291
-278
-sanction-level
-sanction-level
-0
-1
-0.5
-0.01
-1
-NIL
-HORIZONTAL
-
 PLOT
-511
-283
-671
-403
-Number of cheaters
+643
+464
+843
+614
+numCheaters
 NIL
 NIL
 0.0
@@ -594,7 +512,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" ""
+"pen-0" 1.0 0 -16777216 true "" ""
 
 @#$#@#$#@
 ## WHAT IS IT?

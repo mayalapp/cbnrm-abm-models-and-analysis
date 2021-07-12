@@ -1,11 +1,9 @@
-;Bravo (2011)
-
-
 globals [
   growth-prob
   satisfaction
   current-institution
   tolerance-threshold
+  num-cheaters
 ]
 
 turtles-own [
@@ -14,6 +12,9 @@ turtles-own [
   reference-trees
   old-payoff
   payoff-satisfaction
+  probability-to-be-caught
+
+  cheater?
 ]
 
 patches-own [
@@ -27,8 +28,12 @@ to setup
   ;; the beginning of your setup procedure and reset-ticks at the end
   ;; of the procedure.)
   clear-all
-  reset-ticks
 
+  ; used to match old version (NetLogo 4.3) default world size
+  resize-world 0 50 0 50
+  set-patch-size 5
+
+  set num-cheaters 0
   set growth-prob .05
   set current-institution 0
   let i 0
@@ -42,6 +47,7 @@ to setup
   ]
   crt initial-loggers
   ask turtles [
+    set cheater? FALSE
     setxy random-pxcor random-pycor
     set payoff 0
     set old-payoff 0
@@ -50,6 +56,8 @@ to setup
     set reference-trees  (max-pxcor * max-pycor) * random-normal reference-threshold 0.25 ;
   ]
   compute-satisfaction
+
+  reset-ticks
 end
 
 to go
@@ -57,7 +65,7 @@ to go
   tree-growth
   turtle-actions
   if ticks mod 10 = 0 [compute-satisfaction]
-  if ticks = 100000 [stop]
+  if ticks = 20000 [stop]
 end
 
 to tree-growth
@@ -77,15 +85,42 @@ end
 to turtle-actions
   ask turtles [
     set payoff payoff - cost
-    ifelse [trees] of patch-here > current-institution
-      [set payoff payoff + [trees] of patch-here
-      ask patch-here [
-        set trees 0
-        set pcolor black
+    set probability-to-be-caught random 100
+
+
+    ifelse ([trees] of patch-here > current-institution)
+    [
+             set payoff payoff + [trees] of patch-here
+             ask patch-here [
+             set trees 0
+             set pcolor black]
         ]
-      ]
-      [move-turtles]
+
+    ; COMMENT: cheating
+
+      [ifelse (abs (minimal-cut - current-institution) > tolerance-threshold or payoff-satisfaction = 0)
+       [
+             set payoff payoff + [trees] of patch-here
+             set cheater? TRUE
+             ask patch-here [
+             set trees 0
+             set pcolor black]
+
+             ; COMMENT: enforcement
+             ifelse probability-to-be-caught > enforcement-level
+             [set num-cheaters num-cheaters + 1
+              die] ; COMMENT: this enfocement mechanism doesn't make much sense
+             [move-turtles]
+
+            ]
+       [move-turtles]
   ]
+
+
+  ]
+
+  ; check if payoff-satisfaction is being changed
+  if any? turtles with [payoff-satisfaction = 0] [print "yes"]
 end
 
 to move-turtles
@@ -113,19 +148,16 @@ to compute-satisfaction
         [set minimal-cut min list (minimal-cut + random 10) (max-tree-growth + 1)]
     ]
   ]
-;  ask turtles with [payoff < 0] [
-;    ifelse count patches with [trees > 0] > reference-trees
-;      [set minimal-cut max list (0) (minimal-cut - random 10)]
-;      [set minimal-cut min list (minimal-cut + random 10) (max-tree-growth + 1)]
-;  ]
 
-  ; institutional change
-  let unsatisfied count  turtles with [abs (minimal-cut - current-institution) > tolerance-threshold or payoff-satisfaction = 0] ;
+
+ ; COMMENT: "endogenous institution"
+  let unsatisfied count  turtles with [abs (minimal-cut - current-institution) > tolerance-threshold or payoff-satisfaction = 0]
   if  unsatisfied > (0.66666 * initial-loggers) [
     set current-institution mean [minimal-cut] of turtles
+    ;print "change institution"
   ]
 
-  ; plots
+
   set-current-plot "K"
   plot current-institution
   set-current-plot "Green patches"
@@ -138,14 +170,18 @@ to compute-satisfaction
   plot mean [minimal-cut] of turtles
   set-current-plot "beta(i)"
   plot mean [reference-trees] of turtles / 2500
+  set-current-plot "unsatisfied"
+  plot unsatisfied
+  set-current-plot "Number of Loggers"
+  plot count turtles
+
+  set num-cheaters num-cheaters + count turtles with [cheater?]
+  set-current-plot "numCheaters"
+  plot num-cheaters
+  ask turtles [set cheater? FALSE]
+  set num-cheaters 0
 
 
-  set-current-plot "highMinCut"
-  plot count turtles with [minimal-cut > (0.9) * max-tree-growth]
-  set-current-plot "lowMinCut"
-  plot count turtles with [minimal-cut < (0.1) * max-tree-growth]
-
-  ;selection
   ask one-of turtles with [payoff = min [payoff] of turtles] [ die ]
   ask one-of turtles with [payoff = max [payoff] of turtles] [
     hatch 1 [
@@ -162,13 +198,13 @@ to compute-satisfaction
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-711
-50
-1139
-479
+309
+10
+654
+356
 -1
 -1
-8.24
+6.61
 1
 10
 1
@@ -188,11 +224,97 @@ GRAPHICS-WINDOW
 ticks
 30.0
 
+SLIDER
+119
+27
+291
+60
+cost
+cost
+0
+10
+5.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+119
+91
+291
+124
+max-tree-growth
+max-tree-growth
+0
+100
+20.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+117
+158
+289
+191
+enforcement-level
+enforcement-level
+0
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+112
+220
+291
+253
+reference-threshold
+reference-threshold
+0
+0.75
+0.5
+0.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+108
+277
+280
+310
+initial-loggers
+initial-loggers
+0
+2000
+100.0
+10
+1
+NIL
+HORIZONTAL
+
+SWITCH
+124
+339
+273
+372
+high-tolerance
+high-tolerance
+0
+1
+-1000
+
 BUTTON
-42
-85
-105
-118
+20
+27
+86
+60
 NIL
 setup
 NIL
@@ -206,12 +328,12 @@ NIL
 1
 
 BUTTON
-42
-174
-105
-207
+26
+80
+89
+113
 NIL
-go
+go\n
 T
 1
 T
@@ -222,26 +344,94 @@ NIL
 NIL
 1
 
-SLIDER
-223
-207
-395
-240
-initial-loggers
-initial-loggers
-10
-1000
-100.0
-10
-1
+MONITOR
+12
+144
+105
+189
 NIL
-HORIZONTAL
+count turtles
+17
+1
+11
 
 PLOT
-73
-267
-273
-417
+432
+622
+632
+772
+K
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" ""
+
+PLOT
+225
+462
+425
+612
+unsatisfied
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" ""
+
+PLOT
+432
+463
+632
+613
+Payoffs
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" ""
+
+PLOT
+684
+14
+884
+164
+Total Biomass
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" ""
+
+PLOT
+17
+463
+217
+613
 Green patches
 NIL
 NIL
@@ -256,11 +446,11 @@ PENS
 "default" 1.0 0 -16777216 true "" ""
 
 PLOT
-483
-422
-683
-572
-K
+17
+625
+217
+775
+beta(i)
 NIL
 NIL
 0.0
@@ -274,28 +464,10 @@ PENS
 "default" 1.0 0 -16777216 true "" ""
 
 PLOT
-278
-267
-478
-417
-Total Biomass
-NIL
-NIL
-0.0
-10.0
--1.0
-1.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" ""
-
-PLOT
-278
-422
-478
-572
+224
+625
+424
+775
 k(i)
 NIL
 NIL
@@ -310,132 +482,11 @@ PENS
 "default" 1.0 0 -16777216 true "" ""
 
 PLOT
-483
-267
-683
-417
-Payoffs
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" ""
-
-SLIDER
-162
-69
-334
-102
-max-tree-growth
-max-tree-growth
-10
-50
-20.0
-5
-1
-NIL
-HORIZONTAL
-
-SLIDER
-162
-159
-334
-192
-reference-threshold
-reference-threshold
-0.25
-0.75
-0.5
-0.05
-1
-NIL
-HORIZONTAL
-
-SLIDER
-162
-24
-334
-57
-cost
-cost
-1
-10
-5.0
-1
-1
-NIL
-HORIZONTAL
-
-PLOT
-73
-422
-273
-572
-beta(i)
-NIL
-NIL
-0.0
-10.0
-0.0
-1.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" ""
-
-SWITCH
-404
-35
-539
-68
-high-tolerance
-high-tolerance
-0
-1
--1000
-
-MONITOR
-532
-119
-627
-172
-NIL
-count turtles
-17
-1
-13
-
-PLOT
-741
-516
-941
-666
-Loggers
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot count turtles"
-
-PLOT
-77
-589
-277
-739
-highMinCut
+645
+624
+848
+775
+Number of loggers
 NIL
 NIL
 0.0
@@ -449,11 +500,11 @@ PENS
 "default" 1.0 0 -16777216 true "" ""
 
 PLOT
-296
-590
-496
-740
-lowMinCut
+643
+464
+843
+614
+numCheaters
 NIL
 NIL
 0.0
@@ -464,44 +515,44 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" ""
+"pen-0" 1.0 0 -16777216 true "" ""
 
 @#$#@#$#@
 ## WHAT IS IT?
 
-This section could give a general understanding of what the model is trying to show or explain.
+(a general understanding of what the model is trying to show or explain)
 
 ## HOW IT WORKS
 
-This section could explain what rules the agents use to create the overall behavior of the model.
+(what rules the agents use to create the overall behavior of the model)
 
 ## HOW TO USE IT
 
-This section could explain how to use the model, including a description of each of the items in the interface tab.
+(how to use the model, including a description of each of the items in the Interface tab)
 
 ## THINGS TO NOTICE
 
-This section could give some ideas of things for the user to notice while running the model.
+(suggested things for the user to notice while running the model)
 
 ## THINGS TO TRY
 
-This section could give some ideas of things for the user to try to do (move sliders, switches, etc.) with the model.
+(suggested things for the user to try to do (move sliders, switches, etc.) with the model)
 
 ## EXTENDING THE MODEL
 
-This section could give some ideas of things to add or change in the procedures tab to make the model more complicated, detailed, accurate, etc.
+(suggested things to add or change in the Code tab to make the model more complicated, detailed, accurate, etc.)
 
 ## NETLOGO FEATURES
 
-This section could point out any especially interesting or unusual features of NetLogo that the model makes use of, particularly in the Procedures tab.  It might also point out places where workarounds were needed because of missing features.
+(interesting or unusual features of NetLogo that the model uses, particularly in the Code tab; or where workarounds were needed for missing features)
 
 ## RELATED MODELS
 
-This section could give the names of models in the NetLogo Models Library or elsewhere which are of related interest.
+(models in the NetLogo Models Library and elsewhere which are of related interest)
 
 ## CREDITS AND REFERENCES
 
-This section could contain a reference to the model's URL on the web if it has one, as well as any other necessary credits or references.
+(a reference to the model's URL on the web if it has one, as well as any other necessary credits, citations, and links)
 @#$#@#$#@
 default
 true
@@ -695,6 +746,22 @@ Polygon -7500403 true true 135 105 90 60 45 45 75 105 135 135
 Polygon -7500403 true true 165 105 165 135 225 105 255 45 210 60
 Polygon -7500403 true true 135 90 120 45 150 15 180 45 165 90
 
+sheep
+false
+15
+Circle -1 true true 203 65 88
+Circle -1 true true 70 65 162
+Circle -1 true true 150 105 120
+Polygon -7500403 true false 218 120 240 165 255 165 278 120
+Circle -7500403 true false 214 72 67
+Rectangle -1 true true 164 223 179 298
+Polygon -1 true true 45 285 30 285 30 240 15 195 45 210
+Circle -1 true true 3 83 150
+Rectangle -1 true true 65 221 80 296
+Polygon -1 true true 195 285 210 285 210 240 240 210 195 210
+Polygon -7500403 true false 276 85 285 105 302 99 294 83
+Polygon -7500403 true false 219 85 210 105 193 99 201 83
+
 square
 false
 0
@@ -778,6 +845,13 @@ Line -7500403 true 216 40 79 269
 Line -7500403 true 40 84 269 221
 Line -7500403 true 40 216 269 79
 Line -7500403 true 84 40 221 269
+
+wolf
+false
+0
+Polygon -16777216 true false 253 133 245 131 245 133
+Polygon -7500403 true true 2 194 13 197 30 191 38 193 38 205 20 226 20 257 27 265 38 266 40 260 31 253 31 230 60 206 68 198 75 209 66 228 65 243 82 261 84 268 100 267 103 261 77 239 79 231 100 207 98 196 119 201 143 202 160 195 166 210 172 213 173 238 167 251 160 248 154 265 169 264 178 247 186 240 198 260 200 271 217 271 219 262 207 258 195 230 192 198 210 184 227 164 242 144 259 145 284 151 277 141 293 140 299 134 297 127 273 119 270 105
+Polygon -7500403 true true -1 195 14 180 36 166 40 153 53 140 82 131 134 133 159 126 188 115 227 108 236 102 238 98 268 86 269 92 281 87 269 103 269 113
 
 x
 false

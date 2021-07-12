@@ -5,6 +5,10 @@ This repository contains the models, data, and analysis for the article "Cheatin
 ## `simulations_and_model_code/`
 Folder containing model code and code used to run the sensitivity analysis simulations. Any single simulation runs were set up and run directly in NetLogo and exported via the NetLogo GUI (using NetLogo's `export plots` function) to a csv file. 
 
+### `NetLogoModels/`
+NetLogo models for the Endogenous Institution (EI) model, the Cheating and Enforcement (C&E) model, the C&E model with corrections, and the Monitoring and Sanctioning (M&S) model. 
+
+
 ## `analysis/` 
 Folder containing data from simulation runs, code to clean the data, figures, and code to replicate the figures. 
 
