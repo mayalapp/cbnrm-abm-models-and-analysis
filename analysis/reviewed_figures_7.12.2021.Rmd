@@ -274,13 +274,15 @@ fig = fig+1
 Regression
 As long as any Enforcement exists, Kf and monitoring-level do not significantly impact BM% 
 ```{r}
-vallinoCorrected_lm_data = enfData_vallinoCorrected%>%mutate(monLevel = (1-as.numeric(as.character(variableValue))/100), anyEnf = ifelse(monLevel!=0, TRUE, FALSE))
+vallinoCorrected_lm_data = enfData_vallinoCorrected %>%mutate(monLevel = (1-as.numeric(as.character(variableValue))/100))%>% filter(monLevel!=0)#%>%mutate(monLevel = (1-as.numeric(as.character(variableValue))/100), anyEnf = ifelse(monLevel!=0, TRUE, FALSE))
 
 vallinoCorrected_lm = lm(TotalBM*100 ~ numLoggers+K+monLevel, data = vallinoCorrected_lm_data)
 summary(vallinoCorrected_lm)
 
-vallinoCorrected_lm2 = lm(TotalBM*100 ~ numLoggers+K+monLevel, data = vallinoCorrected_lm_data%>%filter(anyEnf))
-summary(vallinoCorrected_lm2)
+
+#this correlation is -.993 (which is high, as it should be)
+cor(vallinoCorrected_lm_data$numLoggers, vallinoCorrected_lm_data$TotalBM)
+
 
 
 ```
