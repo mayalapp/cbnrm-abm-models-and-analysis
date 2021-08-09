@@ -46,8 +46,9 @@ point_size = 3
 line_size = 1.2
   
 # create axes labels that are used repeatedly 
-ax_kf = expression(paste(bolditalic("final-institution "),bold("("), K[f], bold(")"))) # final-institutions (Kf)
+ax_kf = expression(paste(bolditalic("final-institution "),bold("("), CI[f], bold(")"))) # final-institutions (Kf)
 axlab_bm<-"Biomass (% remaining)"
+axlab_bmf<-expression(paste(bolditalic("final-biomass "),bold("("), BM[f], bold("%)"))) # final-biomass (BMf)
 axlab_density <- "Density"
 axlab_time <- "Period"
 axlab_perc <- "Percent remianing"
@@ -56,7 +57,7 @@ ax_mon = expression(bolditalic(monitoring-level))
 ax_rt=expression(bolditalic("reference-threshold"))
 ax_surveillance=expression(bold(bolditalic("surveillance-level")))
 ax_mc=expression(bold(bolditalic("minimum-cut")))
-ax_k=expression(paste(bold(bolditalic("current-institution ")), bold("(K)"))) # current-institution (K)
+ax_k=expression(paste(bold(bolditalic("current-institution ")), bold("(CI)"))) # current-institution (K)
 
 
 
@@ -269,7 +270,7 @@ Number of loggers dominates BM% remaining
 enfGraphCorrected=enfData_vallinoCorrected%>%mutate(enfValue=1-(as.numeric(variableValue)-1)/10)
 viz_surv = enfGraphCorrected %>% filter(enfValue !=0)%>%ggplot(aes(x = numLoggers*100, y = TotalBM*100, color = enfValue))+
   geom_point(aes(color = enfValue), size = 2, alpha = 0.4)+
-  labs(color = ax_mon, x = "Loggers (% remaining)", y = axlab_bm)+
+  labs(color = ax_mon, x = "Loggers (% remaining)", y = axlab_bmf)+
   setGraphs + scale_color_distiller(palette = "Spectral")#+ scale_color_brewer()#colorCont
 
 
@@ -306,7 +307,7 @@ plot_ms = allData_revised %>% mutate(lowLoggers = param == "log" & (variableValu
 
 viz_ms_KBM = plot_ms %>% ggplot(aes(x = K, y = TotalBM*100, color = lowLoggers))+
   geom_point(size = 2)+
-  labs(x = ax_kf, y = axlab_bm, color = "")+
+  labs(x = ax_kf, y = axlab_bmf, color = "")+
     scale_color_manual(breaks=c(TRUE, FALSE), labels = c("60 or 80 Loggers", "All other parameter sets"), values=c(color1, color2))+
   setGraphs#+colorDiscrete
 
@@ -337,7 +338,7 @@ monitoring and sanctioning scatterplots, with mon/sanc = 0.2 and 0.8
 viz_mon_2_8 = monitoringData_revised%>% filter(variableValue == 0.2| variableValue == 0.8)%>%ggplot(aes(x= K, y = TotalBM*100))+
   geom_point(aes(color = variableValue))+
   labs(color = ax_mon)+
-  ylab(axlab_bm)+
+  ylab(axlab_bmf)+
   xlab(ax_kf)+
   setGraphs+
   colorDiscrete+
@@ -351,7 +352,7 @@ viz_mon_2_8 = monitoringData_revised%>% filter(variableValue == 0.2| variableVal
 viz_sanc_2_8 = sanctionData_revised%>% filter(variableValue == 2| variableValue == 8)%>%ggplot(aes(x= K, y = TotalBM*100))+
   geom_point(aes(color = as.factor(as.numeric(as.character(variableValue))/10)))+
   labs(color = ax_sanc)+
-  ylab(axlab_bm)+
+  ylab(axlab_bmf)+
   xlab(ax_kf)+
   setGraphs+
   colorDiscrete+
