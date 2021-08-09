@@ -259,15 +259,23 @@ baseData_vallinoCorrected%>%summarize(mean(TotalBM))*100
 ### Figure `r fig`
 Number of loggers dominates BM% remaining 
 ```{r}
-enfGraphCorrected=enfData_vallinoCorrected%>%mutate(enfValue=rev(as.factor((as.numeric(variableValue)-1)/10)))
+#enfGraphCorrected=enfData_vallinoCorrected%>%mutate(enfValue=rev(as.factor((as.numeric(variableValue)-1)/10)))
+#viz_surv = enfGraphCorrected %>% filter(enfValue !=0)%>%ggplot(aes(x = numLoggers*100, y = TotalBM*100, color #= enfValue))+
+#  geom_point(aes(color = enfValue), size = 2, alpha = 0.3)+
+#  labs(color = ax_mon, x = "Loggers (% remaining)", y = axlab_bm)+
+#  setGraphs + scale_color_brewer(palette="Spectral")
+
+
+enfGraphCorrected=enfData_vallinoCorrected%>%mutate(enfValue=1-(as.numeric(variableValue)-1)/10)
 viz_surv = enfGraphCorrected %>% filter(enfValue !=0)%>%ggplot(aes(x = numLoggers*100, y = TotalBM*100, color = enfValue))+
-  geom_point(aes(color = enfValue), size = 2, alpha = 0.3)+
+  geom_point(aes(color = enfValue), size = 2, alpha = 0.4)+
   labs(color = ax_mon, x = "Loggers (% remaining)", y = axlab_bm)+
-  setGraphs + scale_color_brewer(palette="Spectral")
+  setGraphs + scale_color_distiller(palette = "Spectral")#+ scale_color_brewer()#colorCont
+
 
 viz_surv
 
-if(savePlots) ggsave("./figs/viz_vallino_mon.pdf", viz_surv, width=5.75, height=3, units="in")
+if(savePlots) ggsave("./figs/viz_vallino_mon_revised.pdf", viz_surv, width=5.75, height=3, units="in")
 fig = fig+1
 ```
 
